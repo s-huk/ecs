@@ -17,7 +17,7 @@
 1. Pipeline mit Filter und Output im entsprechenden Verzeichnis anlegen
 2. Pipeline in pipelines.yml definieren
 3. Pipeline im entsprechenden Distributor Pattern aufnehmen
-4. Logstash führt nach Änderungen an der Konfiguration automatisch einen Reload aus (dauerhaft Funktionalität/Stabilität ist noch zu überprüfen)
+4. Logstash führt nach Änderungen an der Konfiguration automatisch einen Reload aus (dauerhafte Funktionalität/Stabilität ist noch zu überprüfen)
 
 ## Links
 
