@@ -11,6 +11,8 @@
 
 **packetbeat** -> Packetbeat Filter + Output
 
+**grok** -> eigene Grok-Pattern
+
 **pipelines.yml** -> Definition aktiver Pipelines 
 
 **logstash.yml** -> allgemeine Konfiguration Logstash
