@@ -1,0 +1,42 @@
+# This file is where you define your pipelines. You can define multiple.
+# For more information on multiple pipelines, see the documentation:
+#   https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
+
+- pipeline.id: drop
+  path.config: "/etc/logstash/avm-git/input/drop.conf"
+
+### Filebeat
+
+- pipeline.id: http-download-legacy
+  path.config: "/etc/logstash/avm-git/filebeat/http-download.conf"
+
+- pipeline.id: ftp-download-legacy
+  path.config: "/etc/logstash/avm-git/filebeat/ftp-download.conf"
+
+#- pipeline.id: nginx_access_log-legacy
+#  path.config: "/etc/logstash/avm-git/filebeat/nginx_access_log.conf"
+
+- pipeline.id: haproxy_access_log-legacy
+  path.config: "/etc/logstash/avm-git/filebeat/haproxy_access_log.conf"
+
+- pipeline.id: auth_log-legacy
+  path.config: "/etc/logstash/avm-git/filebeat/auth_log.conf"
+
+#- pipeline.id: fail2ban-legacy
+#  path.config: "/etc/logstash/avm-git/filebeat/fail2ban.conf"
+
+### Metricbeat
+
+- pipeline.id: haproxy_stats-legacy
+  path.config: "/etc/logstash/avm-git/metricbeat/haproxy_stats.conf"
+
+### KAFKA INPUT ###
+
+- pipeline.id: filebeat_input
+  path.config: "/etc/logstash/avm-git/input/filebeat.conf"
+
+- pipeline.id: metricbeat_input
+  path.config: "/etc/logstash/avm-git/input/metricbeat.conf"
+
+#- pipeline.id: packetbeat_input
+#  path.config: "/etc/logstash/avm-git/input/packetbeat.conf"

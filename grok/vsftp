@@ -1,0 +1,3 @@
+# ARP: common vsftpd patterns
+DATESTAMP_VSFTP %{DAY} %{MONTH} +%{MONTHDAY} %{TIME} %{YEAR}
+VSFTP %{DATESTAMP_VSFTP:timestamp} %{NUMBER:duration} %{IPORHOST:clientip} %{NUMBER:bytes} %{NOTSPACE:request} (?<transfer_type>[a|b]) (?<special_action_flag>.) (?<direction>[i|o]) (?<access_mode>[a|g|r]) %{NOTSPACE:username} %{NOTSPACE:servicename} %{NUMBER:authentication_method} %{NOTSPACE:authenticated_user_id} (?<completion_status>[c|i])
