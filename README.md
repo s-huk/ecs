@@ -1,4 +1,4 @@
-##Struktur
+## Struktur
 
 **input** -> Distributor Pattern (Filebeat,Metricbeat und Packetbeat)
 
@@ -10,7 +10,7 @@
 
 **pipelines.yml** -> Definition aktiver Pipelines
 
-##Pipeline anlegen
+## Pipeline anlegen
 
 1. Pipeline mit Filter und Output im entsprechenden Verzeichnis anlegen
 2. Pipeline in pipelines.yml definieren
