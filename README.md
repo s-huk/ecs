@@ -22,4 +22,5 @@
 ## Links
 
 [Logstash Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html)
+
 [Logstash Distributor Pattern](https://www.elastic.co/guide/en/logstash/current/pipeline-to-pipeline.html#distributor-pattern)
