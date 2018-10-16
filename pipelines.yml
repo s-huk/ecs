@@ -38,5 +38,5 @@
 - pipeline.id: metricbeat_input
   path.config: "/etc/logstash/avm-git/input/metricbeat.conf"
 
-#- pipeline.id: packetbeat_input
-#  path.config: "/etc/logstash/avm-git/input/packetbeat.conf"
+- pipeline.id: packetbeat_input
+  path.config: "/etc/logstash/avm-git/input/packetbeat.conf"
