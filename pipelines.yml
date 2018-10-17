@@ -30,6 +30,11 @@
 - pipeline.id: haproxy_stats-legacy
   path.config: "/etc/logstash/avm-git/metricbeat/haproxy_stats.conf"
 
+### Winlogbeat
+
+- pipeline.id: winlogbeat
+  path.config: "/etc/logstash/avm-git/winlogbeat/winlog.conf"
+
 ### KAFKA INPUT ###
 
 - pipeline.id: filebeat_input
