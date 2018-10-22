@@ -4,5 +4,5 @@ action="/etc/logstash/avm-git/curator/actionfiles"
 #
 #
 # Actions
-curator --config $config $action/action.yml
+curator --config $config $action/delete.yml
 
