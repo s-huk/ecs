@@ -3,13 +3,17 @@
 
 ## Struktur
 
-**input** -> Distributor Pattern (Filebeat,Metricbeat und Packetbeat)
+**pipelines** -> Distributor Pattern (Filebeat,Metricbeat und Packetbeat)
 
-**filebeat** -> Filebeat Filter + Output
+**pipelines/filebeat** -> Filebeat Filter + Output
 
-**metricbeat** -> Metricbeat Filter + Output
+**pipelines/metricbeat** -> Metricbeat Filter + Output
 
-**packetbeat** -> Packetbeat Filter + Output
+**pipelines/packetbeat** -> Packetbeat Filter + Output
+
+**pipelines/winlogbeat** -> Winlogbeat Filter + Output
+
+**pipelines/generic** -> Generic Filter + Output
 
 **grok** -> eigene Grok-Pattern
 
