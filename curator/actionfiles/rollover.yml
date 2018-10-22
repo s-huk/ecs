@@ -14,7 +14,7 @@ actions:
     options:
       name: filebeat-haproxy_access_log
       conditions:
-        max_age: 1d
-        max_docs: 5000
-        max_size: 5gb
+        max_age: 1w
+        #max_docs: 5000
+        max_size: 50gb
 
