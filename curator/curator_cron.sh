@@ -7,5 +7,3 @@ for action in /etc/logstash/avm-git/curator/actionfiles/*;
 do
 	curator --config $config $action
 done
-
-
