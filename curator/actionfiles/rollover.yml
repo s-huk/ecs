@@ -17,4 +17,13 @@ actions:
         max_age: 1w
         #max_docs: 5000
         max_size: 50gb
+  2:
+    action: rollover
+    description: Packetbeat Rollover
+    options:
+      name: packetbeat
+      conditions:
+        max_age: 1w
+        #max_docs: 5000
+        max_size: 50gb
 
