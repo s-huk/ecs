@@ -8,9 +8,7 @@
 actions:
   1:
     action: rollover
-    description: >-
-      Rollover the index associated with alias 'aliasname', which should be in the
-      form of prefix-000001 (or similar), or prefix-YYYY.MM.DD-1.
+    description: filebeat-haproxy_access_log Rollover
     options:
       name: filebeat-haproxy_access_log
       conditions:
@@ -26,4 +24,48 @@ actions:
         max_age: 1w
         #max_docs: 5000
         max_size: 50gb
-
+ 3:
+    action: rollover
+    description: Winlogbeat Rollover
+    options:
+      name: winlogbeat
+      conditions:
+        max_age: 1m
+        #max_docs: 5000
+        max_size: 50gb
+ 4:
+    action: rollover
+    description: filebeat-http-download Rollover
+    options:
+      name: filebeat-http-download
+      conditions:
+        max_age: 1w
+        #max_docs: 5000
+        max_size: 50gb
+5:
+    action: rollover
+    description: filebeat-ftp-download Rollover
+    options:
+      name: filebeat-ftp-download
+      conditions:
+        max_age: 1w
+        #max_docs: 5000
+        max_size: 50gb
+6:
+    action: rollover
+    description:  metricbeat-haproxy_stats Rollover
+    options:
+      name: metricbeat-haproxy_stats
+      conditions:
+        max_age: 1w
+        #max_docs: 5000
+        max_size: 50gb
+7:
+    action: rollover
+    description:  filebeat-auth_log Rollover
+    options:
+      name: filebeat-auth_log
+      conditions:
+        max_age: 1m
+        #max_docs: 5000
+        max_size: 50gb
