@@ -24,7 +24,7 @@ actions:
         max_age: 7d
         #max_docs: 5000
         max_size: 40gb
- 3:
+  3:
     action: rollover
     description: Winlogbeat Rollover
     options:
@@ -33,7 +33,7 @@ actions:
         max_age: 30d
         #max_docs: 5000
         max_size: 40gb
- 4:
+  4:
     action: rollover
     description: filebeat-http-download Rollover
     options:
@@ -42,7 +42,7 @@ actions:
         max_age: 7d
         #max_docs: 5000
         max_size: 40gb
-5:
+  5:
     action: rollover
     description: filebeat-ftp-download Rollover
     options:
@@ -51,7 +51,7 @@ actions:
         max_age: 7d
         #max_docs: 5000
         max_size: 40gb
-6:
+  6:
     action: rollover
     description: metricbeat-haproxy_stats Rollover
     options:
@@ -60,7 +60,7 @@ actions:
         max_age: 7d
         #max_docs: 5000
         max_size: 40gb
-7:
+  7:
     action: rollover
     description:  filebeat-auth_log Rollover
     options:
