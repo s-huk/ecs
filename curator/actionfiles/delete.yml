@@ -1,7 +1,7 @@
 actions:
   1:
     action: delete_indices
-    description: Monitoring
+    description: delete monitoring-*
     options:
       ignore_empty_list: True
       disable_action: False
@@ -10,14 +10,13 @@ actions:
       kind: prefix
       value: .monitoring-
     - filtertype: age
-      source: name
+      source: creation_date
       direction: older
-      timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 5
+      unit_count: 3
   2:
     action: delete_indices
-    description: Winlog
+    description: delete winlogbeat-*
     options:
       ignore_empty_list: True
       disable_action: False
@@ -26,14 +25,13 @@ actions:
       kind: prefix
       value: winlog-
     - filtertype: age
-      source: name
+      source: creation_date
       direction: older
-      timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 7
+      unit_count: 30
   3:
     action: delete_indices
-    description: Download-Server
+    description: delete *-download-*
     options:
       ignore_empty_list: True
       disable_action: False
@@ -42,9 +40,67 @@ actions:
       kind: regex
       value: '.*download.*'
     - filtertype: age
-      source: name
+      source: creation_date
       direction: older
-      timestring: '%Y.%m.%d'
       unit: days
+      unit_count: 30
+  4:
+    action: delete_indices
+    description: delete filebeat-haproxy_access_log-*
+    options:
+      ignore_empty_list: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: filebeat-haproxy_access_log-
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: days
+      unit_count: 21
+  5:
+    action: delete_indices
+    description: delete filebeat-auth_log-*
+    options:
+      ignore_empty_list: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: filebeat-auth_log-
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: months
       unit_count: 3
-
+  6:
+    action: delete_indices
+    description: delete packetbeat-*
+    options:
+      ignore_empty_list: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: packetbeat-
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: days
+      unit_count: 21
+  7:
+    action: delete_indices
+    description: delete metricbeat-haproxy_stats-*
+    options:
+      ignore_empty_list: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: metricbeat-haproxy_stats-
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: days
+      unit_count: 21
