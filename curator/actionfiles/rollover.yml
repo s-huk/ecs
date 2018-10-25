@@ -15,3 +15,57 @@ actions:
         max_age: 7d
         #max_docs: 5000
         max_size: 30gb
+  2:
+    action: rollover
+    description: Packetbeat Rollover
+    options:
+      name: packetbeat
+      conditions:
+        max_age: 7d
+        #max_docs: 5000
+        max_size: 40gb
+ 3:
+    action: rollover
+    description: Winlogbeat Rollover
+    options:
+      name: winlogbeat
+      conditions:
+        max_age: 30d
+        #max_docs: 5000
+        max_size: 40gb
+ 4:
+    action: rollover
+    description: filebeat-http-download Rollover
+    options:
+      name: filebeat-http-download
+      conditions:
+        max_age: 7d
+        #max_docs: 5000
+        max_size: 40gb
+5:
+    action: rollover
+    description: filebeat-ftp-download Rollover
+    options:
+      name: filebeat-ftp-download
+      conditions:
+        max_age: 7d
+        #max_docs: 5000
+        max_size: 40gb
+6:
+    action: rollover
+    description: metricbeat-haproxy_stats Rollover
+    options:
+      name: metricbeat-haproxy_stats
+      conditions:
+        max_age: 7d
+        #max_docs: 5000
+        max_size: 40gb
+7:
+    action: rollover
+    description:  filebeat-auth_log Rollover
+    options:
+      name: filebeat-auth_log
+      conditions:
+        max_age: 30d
+        #max_docs: 5000
+        max_size: 40gb
