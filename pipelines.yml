@@ -22,6 +22,9 @@
 - pipeline.id: auth_log-legacy
   path.config: "/etc/logstash/avm-git/pipelines/filebeat/auth_log-legacy.conf"
 
+- pipeline.id: dhcp-legacy
+  path.config: "/etc/logstash/avm-git/pipelines/filebeat/dhcp-legacy.conf"
+
 #- pipeline.id: fail2ban-legacy
 #  path.config: "/etc/logstash/avm-git/pipelines/filebeat/fail2ban-legacy.conf"
 
