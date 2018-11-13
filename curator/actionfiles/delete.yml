@@ -43,7 +43,7 @@ actions:
       source: creation_date
       direction: older
       unit: days
-      unit_count: 30
+      unit_count: 14
   4:
     action: delete_indices
     description: delete filebeat-haproxy_access_log-*
@@ -58,7 +58,7 @@ actions:
       source: creation_date
       direction: older
       unit: days
-      unit_count: 21
+      unit_count: 14
   5:
     action: delete_indices
     description: delete filebeat-auth_log-*
