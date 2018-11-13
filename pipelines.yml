@@ -8,10 +8,10 @@
 ### Filebeat
 
 - pipeline.id: http-download-legacy
-  path.config: "/etc/logstash/avm-git/pipelines/filebeat/http-download-legacy.conf"
+  path.config: "/etc/logstash/avm-git/pipelines/filebeat/http_download-legacy.conf"
 
 - pipeline.id: ftp-download-legacy
-  path.config: "/etc/logstash/avm-git/pipelines/filebeat/ftp-download-legacy.conf"
+  path.config: "/etc/logstash/avm-git/pipelines/filebeat/ftp_download-legacy.conf"
 
 #- pipeline.id: nginx_access_log-legacy
 #  path.config: "/etc/logstash/avm-git/pipelines/filebeat/nginx_access_log-legacy.conf"
