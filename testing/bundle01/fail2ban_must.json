@@ -1,0 +1,33 @@
+{
+  "beat": {
+    "name": "argo-lb-02",
+    "version": "6.4.3",
+    "hostname": "argo-lb-02"
+  },
+  "offset": 9268927,
+  "@version": "1",
+  "host": {
+    "name": "argo-lb-02"
+  },
+  "message": "2018-11-15 01:06:33,139 fail2ban.actions        [1670]: NOTICE  [tr069] Ban 80.69.196.222",
+  "source": {
+    "ip": "80.69.196.222"
+  },
+  "network": {
+    "application": "tr069"
+  },
+  "prospector": {
+    "type": "log"
+  },
+  "@timestamp": "2018-11-15T00:06:33.139Z",
+  "input": {
+    "type": "log"
+  },
+  "fields": {
+    "topic": "ops_filebeat",
+    "service_type": "fail2ban"
+  },
+  "file": {
+    "path": "/var/log/fail2ban.log"
+  }
+}
