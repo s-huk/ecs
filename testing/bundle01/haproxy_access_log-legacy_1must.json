@@ -1,0 +1,68 @@
+{
+  "@timestamp": "2018-11-16T00:40:58.119Z",
+  "@version": "1",
+  "accept_date": "16/Nov/2018:01:40:57.455",
+  "actconn": "149",
+  "backend_name": "dns",
+  "backend_queue": "0",
+  "beat": {
+    "hostname": "argo-lb-02",
+    "name": "argo-lb-02",
+    "version": "6.4.3"
+  },
+  "beconn": "2",
+  "bytes_read": "226",
+  "captured_request_cookie": "-",
+  "captured_response_cookie": "-",
+  "client_port": "34378",
+  "feconn": "21",
+  "fields": {
+    "service_type": "haproxy_access_log",
+    "topic": "ops_filebeat"
+  },
+  "file": {
+    "path": "/avm/logs/haproxy/haproxy.log"
+  },
+  "frontend_name": "dns",
+  "haproxy_hour": "01",
+  "haproxy_milliseconds": "455",
+  "haproxy_minute": "40",
+  "haproxy_month": "Nov",
+  "haproxy_monthday": "16",
+  "haproxy_second": "57",
+  "haproxy_time": "01:40:57",
+  "haproxy_year": "2018",
+  "host": {
+    "name": "argo-lb-02"
+  },
+  "http_status_code": "200",
+  "http_verb": "GET",
+  "http_version": "1.1",
+  "input": {
+    "type": "log"
+  },
+  "offset": 5134327072,
+  "pid": "1701",
+  "program": "haproxy",
+  "prospector": {
+    "type": "log"
+  },
+  "retries": "0",
+  "server_name": "argo-app-01",
+  "source": {
+    "ip": "78.55.162.196"
+  },
+  "srv_queue": "0",
+  "srvconn": "3",
+  "syslog_server": "argo-lb-02",
+  "syslog_timestamp": "Nov 16 01:40:57",
+  "termination_state": "----",
+  "time_backend_connect": "0",
+  "time_backend_response": "7",
+  "time_duration": "8",
+  "time_queue": "0",
+  "time_request": "1",
+  "url": {
+    "path": "/update.php?ipv4=78.55.162.196&ipv6="
+  }
+}

@@ -6,6 +6,7 @@ require 'logstash/devutils/rspec/spec_helper'
 # running the grok code outside a logstash package means
 # LOGSTASH_HOME will not be defined, so let's set it here
 # before requiring the grok filter
+#
 unless LogStash::Environment.const_defined?(:LOGSTASH_HOME)
   LogStash::Environment::LOGSTASH_HOME = File.expand_path('../../', __FILE__)
 end
@@ -28,86 +29,97 @@ require 'logstash/plugin'
 require 'logstash/inputs/syslog'
 require 'logstash/filters/grok'
 require 'json'
+require 'diffy' #require_relative 'logstash/vendor/jruby/lib/ruby/gems/shared/gems/diffy-3.2.1/lib/diffy'
 
-
-# Abwandlung von Quelle:  https://gist.github.com/binarydev/aeb35977a2ad22eeaea1 (code wurde auf Korrektheit geprueft)
 def compare_json(json1, json2)
-  result = false
-
-  # Typumwandlung nach JSON
-  unless((json1.class == json2.class) && (json1.is_a?(String) || json1.is_a?(Hash) || json1.is_a?(Array))) 
-    return false
-  end
-  json1,json2 = [json1,json2].map! do |json|
-    json.is_a?(String) ? JSON.parse(json) : json
-  end
-
-  # Pruefung auf Gleichheit (rekursiv)
-  if(json1.is_a?(Array))
-    json1.each_with_index do |obj, index|
-      json1_obj, json2_obj = obj, json2[index]
-      result = compare_json(json1_obj, json2_obj)
-      break unless result
-    end
-  elsif(json1.is_a?(Hash))
-    json1.each do |key,value|
-      return false unless json2.has_key?(key)
-      json1_val, json2_val = value, json2[key]
-      if(json1_val.is_a?(Array) || json1_val.is_a?(Hash))
-        result = compare_json(json1_val, json2_val)
-      else
-        result = (json1_val == json2_val)
-      end
-      break if result == false
-    end
-  end
-
-  return result ? true : false
+	if(json1.is_a?(Array) && json2.is_a?(Array) && json1.count == json2.count) 
+		json1.each_with_index do |obj, index|
+			json1_obj, json2_obj = obj, json2[index]
+			result = compare_json(json1_obj, json2_obj)
+			return false if result == false
+		end
+	elsif(json1.is_a?(Hash) && json2.is_a?(Hash) && json1.count == json2.count)
+		json1.each do |key,value|
+			return false unless json2.has_key?(key) and compare_json(value, json2[key])		
+		end
+	else 
+		return false if not json1 == json2
+	end
+	return true
 end
 
 
-describe 'simple syslog line' do
-  file = File.open(Dir.pwd + "/../../pipelines/filebeat/fail2ban-legacy.conf", 'rb')
-  allLines = file.read
-  file.close
-  
-  if allLines =~ /^.*(?<flines>filter.*)output.*$/im   # i:ignore case, m:match all characters esp. \n
-      flines = "input { stdin { codec => json } }\n"+$1+"\n\n"
-  else 
-      raise "grok parse failure"
-  end 
-  puts "\n\n######################\nFilter-Konfiguration:\n######################\n"+flines
-  config flines
-    
-#   config <<-CONFIG
-#     filter {
-#       ...  
-#     }
-#   CONFIG
-  
-
-  fileJson = File.open(Dir.pwd + "/../bundle01/fail2ban_in.json", "rb")
-  str_json_in_kafka = fileJson.read
-  json_in_kafka = JSON.parse(str_json_in_kafka)
-  fileJson.close
-
-  fileJson = File.open(Dir.pwd + "/../bundle01/fail2ban_must.json", "rb")
-  json_must = JSON.parse(fileJson.read)
-  fileJson.close
-  
-  sample json_in_kafka do
-    #insist { subject.get('test') } == ('testwert')
-    # subject.class ist LogStash::Event
-    json_result = JSON.parse( subject.to_json )
-    puts "\n\n======================\nLogstash-Ergebnis:\n======================\n"+JSON.pretty_generate(json_result)
-    puts "\n\n***********************\nLogstash-Erwartung:\n***********************\n"+JSON.pretty_generate(json_must)
-    expect( compare_json(json_result, json_must) ).to be true
-#    File.open(Dir.pwd + "/../bundle01/fail2ban_result.json","w") do |f|
-#        f.write(JSON.pretty_generate(json_result))
-#    end
-  end
-
+def order_json(json1)
+	if json1.is_a?(Array)
+		newArray = Array.new
+		json1.each_with_index {|val, i| newArray[i] = order_json(val) }
+		return array
+	elsif json1.is_a?(Hash)
+		newHash = Hash.new
+		json1.each {|key, val| newHash[key] = order_json(val) }
+		return newHash.class[newHash.sort {|x, y| x[0].to_s <=> y[0].to_s } ]
+	else
+		return json1
+	end
 end
+
+
+Dir["../../pipelines/*/*.conf"].each { |conf_path| 
+	event_type = File.basename(conf_path, ".conf")
+
+	Dir["../bundle01/"+event_type+"_*in.json"].each { |in_path| 
+		file_id = ""
+		if in_path =~ /^.*#{event_type}_(.*)in.json$/im
+			file_id = $1
+		end
+		describe "test filter conf: "+event_type+"_"+file_id do
+			file = File.open(conf_path, 'rb')
+			fileLines = file.read
+			file.close
+
+			if fileLines =~ /^.*(filter.*)output.*$/im   # i:ignore case, m:match all characters esp. \n
+				flines = "input { stdin { codec => json } }\n"+$1+"\n\n"
+			else
+				raise "filter file parse failure"
+			end
+
+			config flines
+
+			fileJson = File.open(in_path, "rb")
+			json_in_kafka = JSON.parse(fileJson.read)
+			fileJson.close
+
+			sample json_in_kafka do # subject.class ist LogStash::Event
+				#insist { subject.get('test') } == ('testwert')
+
+				if File.file?("../bundle01/"+event_type+"_"+file_id+"must.json")
+					fileJson = File.open("../bundle01/"+event_type+"_"+file_id+"must.json", "rb")
+					json_must = JSON.parse(fileJson.read)
+					fileJson.close
+				else
+					json_must = JSON.parse("{}")
+				end
+				
+				json_result = JSON.parse( subject.to_json )
+				if not compare_json(json_result, json_must)
+					puts "\n\n######################\nFilter-Konfiguration:\n######################\n"+flines
+					pretty_must = JSON.pretty_generate( order_json(json_must) )
+					pretty_result = JSON.pretty_generate( order_json(json_result) )
+					puts "\n\n++++++++++++++++++++++++++++++++++++++\nErgebnis inkl. erwarteter Anpassungen:\n++++++++++++++++++++++++++++++++++++++\n"
+					puts Diffy::Diff.new(pretty_result, pretty_must) .to_s(:color)+"\n\n"
+				end 
+				
+				expect( compare_json(json_result, json_must) ).to be true
+				#    File.open(Dir.pwd + "/../bundle01/fail2ban_result.json","w") do |f|
+				#        f.write(JSON.pretty_generate(json_result))
+				#    end
+			end
+		end
+	}
+  }
+  
+
+
 
 
 

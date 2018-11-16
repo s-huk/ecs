@@ -1,0 +1,30 @@
+{
+  "@timestamp": "2018-11-16T00:40:58.119Z",
+  "@metadata": {
+    "beat": "filebeat",
+    "type": "doc",
+    "version": "6.4.3",
+    "topic": "ops_filebeat"
+  },
+  "host": {
+    "name": "argo-lb-02"
+  },
+  "offset": 5134327072,
+  "message": "Nov 16 01:40:57 argo-lb-02 haproxy[1701]: 78.55.162.196:34378 [16/Nov/2018:01:40:57.455] dns dns/argo-app-01 1/0/0/7/8 200 226 - - ---- 149/21/2/3/0 0/0 \"GET /update.php?ipv4=78.55.162.196&ipv6= HTTP/1.1\"",
+  "source": "/avm/logs/haproxy/haproxy.log",
+  "input": {
+    "type": "log"
+  },
+  "prospector": {
+    "type": "log"
+  },
+  "fields": {
+    "service_type": "haproxy_access_log",
+    "topic": "ops_filebeat"
+  },
+  "beat": {
+    "name": "argo-lb-02",
+    "hostname": "argo-lb-02",
+    "version": "6.4.3"
+  }
+}
