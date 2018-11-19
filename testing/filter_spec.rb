@@ -63,6 +63,20 @@ def order_json(json1)
 	end
 end
 
+def withdraw_comments(json_lines)
+	resJson = ""
+	# Kommentare zeilenweise herausfiltern - Matching von Quotings mit Hilfe von Lookbehind: +((?<![\\])['"])((?:.(?!(?<![\\])\2))*.?)\2
+	json_lines.each_line do |line|
+		if line =~ /^((((?<![\\])['"])(?:.(?!(?<![\\])\3))*.?\3|[A-Za-z0-9,.: \t}{\[\]]*+)+)(\#.*)?$/
+			next if $1 == nil # $1 = JSON-Zeile ohne Kommentar  $4 = Kommentar 
+			resJson += $1
+		else 
+			resJson += line
+		end
+	end	
+	return resJson
+end
+
 
 Dir["../../pipelines/*/*.conf"].each { |conf_path| 
 	event_type = File.basename(conf_path, ".conf")
@@ -94,7 +108,9 @@ Dir["../../pipelines/*/*.conf"].each { |conf_path|
 
 				if File.file?("../bundle01/"+event_type+"_"+file_id+"must.json")
 					fileJson = File.open("../bundle01/"+event_type+"_"+file_id+"must.json", "rb")
-					json_must = JSON.parse(fileJson.read)
+					#strJson = fileJson.read
+					strJson = withdraw_comments(fileJson.read)
+					json_must = JSON.parse(strJson)
 					fileJson.close
 				else
 					json_must = JSON.parse("{}")
@@ -105,11 +121,16 @@ Dir["../../pipelines/*/*.conf"].each { |conf_path|
 					puts "\n\n######################\nFilter-Konfiguration:\n######################\n"+flines
 					pretty_must = JSON.pretty_generate( order_json(json_must) )
 					pretty_result = JSON.pretty_generate( order_json(json_result) )
-					puts "\n\n++++++++++++++++++++++++++++++++++++++\nErgebnis inkl. erwarteter Anpassungen:\n++++++++++++++++++++++++++++++++++++++\n"
-					puts Diffy::Diff.new(pretty_result, pretty_must) .to_s(:color)+"\n\n"
+					if compare_json(JSON.parse("{}"), json_must)
+						puts "\n\n++++++++++++++++++++++++++++++++++++++\nErgebnis:\n++++++++++++++++++++++++++++++++++++++\n"
+						puts pretty_result+"\n\n"
+					else
+						puts "\n\n++++++++++++++++++++++++++++++++++++++\nErgebnis inkl. erwarteter Anpassungen:\n++++++++++++++++++++++++++++++++++++++\n"
+						puts Diffy::Diff.new(pretty_result, pretty_must) .to_s(:color)+"\n\n"
+						expect( compare_json(json_result, json_must) ).to be true
+					end
 				end 
 				
-				expect( compare_json(json_result, json_must) ).to be true
 				#    File.open(Dir.pwd + "/../bundle01/fail2ban_result.json","w") do |f|
 				#        f.write(JSON.pretty_generate(json_result))
 				#    end
