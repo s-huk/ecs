@@ -78,15 +78,20 @@ def withdraw_comments(json_lines)
 end
 
 
-Dir["../../pipelines/*/*.conf"].each { |conf_path| 
-	event_type = File.basename(conf_path, ".conf")
+puts
 
-	Dir["../bundle01/"+event_type+"_*in.json"].each { |in_path| 
+Dir["../../"+ENV["LOGSTASH_TESTING_CONF_PATTERN"]].each { |conf_path|
+    next unless conf_path.end_with?(".conf")
+    relative_path_prefix = conf_path.chomp('.conf').sub(/^\.\.\/\.\.\//, '')
+
+    puts "DISCOVERED FILTER CONFIG FILE: "+relative_path_prefix+".conf"
+	Dir["../../"+ENV["LOGSTASH_TESTING_TESTBUNDLE_DIR"]+"/"+relative_path_prefix+"_*in.json"].each { |in_path|
+        puts "  |->DISCOVERED JSON INPUT FILE: "+in_path.sub(/^\.\.\/\.\.\//, '')
 		file_id = ""
-		if in_path =~ /^.*#{event_type}_(.*)in.json$/im
+		if in_path =~ /^.*#{relative_path_prefix}_(.*)in.json$/im
 			file_id = $1
 		end
-		describe "test filter conf: "+event_type+"_"+file_id do
+		describe "test filter conf: "+relative_path_prefix+"_"+file_id do
 			file = File.open(conf_path, 'rb')
 			fileLines = file.read
 			file.close
@@ -105,9 +110,8 @@ Dir["../../pipelines/*/*.conf"].each { |conf_path|
 
 			sample json_in_kafka do # subject.class ist LogStash::Event
 				#insist { subject.get('test') } == ('testwert')
-
-				if File.file?("../bundle01/"+event_type+"_"+file_id+"must.json")
-					fileJson = File.open("../bundle01/"+event_type+"_"+file_id+"must.json", "rb")
+                if File.file?("../../"+ENV["LOGSTASH_TESTING_TESTBUNDLE_DIR"]+"/"+relative_path_prefix+"_"+file_id+"must.json")
+                    fileJson = File.open("../../"+ENV["LOGSTASH_TESTING_TESTBUNDLE_DIR"]+"/"+relative_path_prefix+"_"+file_id+"must.json", "rb")
 					#strJson = fileJson.read
 					strJson = withdraw_comments(fileJson.read)
 					json_must = JSON.parse(strJson)
@@ -137,9 +141,9 @@ Dir["../../pipelines/*/*.conf"].each { |conf_path|
 			end
 		end
 	}
-  }
+}
   
-
+puts
 
 
 
