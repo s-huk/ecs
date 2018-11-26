@@ -29,18 +29,20 @@
 4. Logstash führt nach Änderungen an der Konfiguration automatisch einen Reload aus (dauerhafte Funktionalität/Stabilität ist noch zu überprüfen)
 
 ## Pipeline testen
-**Testumgebung initialisieren, Tests starten, Hilfe anzeigen**: `./run-testbundle.sh`
 
-**Beispiel:** `./run-testbundle.sh bundle01` (siehe Hilfe)
+- **Hilfe anzeigen:** `./run-testbundle.sh -h`
+- **Testumgebung initialisieren, Tests starten:** `./run-testbundle.sh` <br>
+(testet jede Conf in pipelines/\*/\*.conf gegen passenden JSON-Input in testing/pipelines/\*/\*.json)
+- **Zu testende Confs explizit angeben:** `./run-testbundle.sh pipelines/*/ha*.conf` (siehe Hilfe)
 
-Jede selektierte Konfiguration (d.h. Conf-File) wird mit jedem namensgleichen JSON-Input-File des angegebenen Testbundles getestet. Konfigurationen ohne passendes JSON-Input-File werden nicht getestet. Optional kann zu jedem JSON-Input-File ein JSON-Must-File (erwarteter Logstash-Output) hinterlegt werden (siehe Beispiele in `testing/bundle01`). 
+Jede selektierte Konfiguration (d.h. Conf-File) wird mit jedem namensgleichen JSON-Input-File in testing/pipelines getestet. Konfigurationen ohne passendes JSON-Input-File werden nicht getestet. Optional kann zu jedem JSON-Input-File ein JSON-Must-File (erwarteter Logstash-Output) hinterlegt werden (siehe Beispiele in testing/pipelines). 
 
 Benennungsmuster der JSON-Dateien: 
 
 - JSON-Input: <conf_filename_ohne_extension>_{optionaler_test_identifier}in.json
 - JSON-Erwartung: <conf_filename_ohne_extension>_{optionaler_test_identifier}must.json
 
-Conf- und JSON-Files werden als zueinander passend betrachtet und getestet, wenn der Base-Filename (d.h. conf_filename_ohne_extension) und auch der relative Pfad zum jeweiligen `pipelines`-Ordner gleich sind.
+Conf- und JSON-Files werden als zueinander passend betrachtet und getestet, wenn der Base-Filename (d.h. conf_filename_ohne_extension) und auch der relative Pfad zum jeweiligen pipelines-Ordner gleich sind.
 
 ## Curator Konfiguration
 
