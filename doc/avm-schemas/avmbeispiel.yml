@@ -1,0 +1,22 @@
+---
+- name: avm.security.paloalto
+  title: paloalto
+  group: 2
+  description: >
+    Ein Beispielschema - um zu zeigen wie AVM-Felder hinzugefuegt werden.
+  type: group
+  fields:
+
+    - name: test1
+      level: core
+      type: keyword
+      description: >
+        Dies ist die Beschreibung des Testfeldes.
+
+        Dies ist eine weitere Zeile der Beschreibung des Testfeldes.
+
+    - name: test2
+      level: core
+      type: long
+      description: >
+        Dies ist die Beschreibung des zweiten Testfeldes.
