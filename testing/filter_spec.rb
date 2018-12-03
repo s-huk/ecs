@@ -96,7 +96,7 @@ Dir["../../"+ENV["LOGSTASH_TESTING_CONF_PATTERN"]].each { |conf_path|
 			fileLines = file.read
 			file.close
 
-			if fileLines =~ /^.*(filter.*)output.*$/im   # i:ignore case, m:match all characters esp. \n
+			if fileLines =~ /^.*\n[ \t]*(filter[ \t]*{.*)\n[ \t]*output[ \t]*{.*$/im   # i:ignore case, m:match all characters esp. \n
 				flines = "input { stdin { codec => json } }\n"+$1+"\n\n"
 			else
 				raise "filter file parse failure"
