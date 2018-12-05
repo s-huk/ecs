@@ -7,6 +7,9 @@
 
 ### Filebeat
 
+- pipeline.id: apache_access_log-ecs
+  path.config: "/etc/logstash/avm-git/pipelines/filebeat/apache_access_log-ecs.conf"
+  
 - pipeline.id: http-download-legacy
   path.config: "/etc/logstash/avm-git/pipelines/filebeat/http_download-legacy.conf"
 
