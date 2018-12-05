@@ -65,7 +65,7 @@
                   "body_sent" : {
                     "properties" : {
                       "bytes" : {
-                           "type" : "interger"
+                           "type" : "integer"
                       }
                     }
                   },
