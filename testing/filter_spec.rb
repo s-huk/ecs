@@ -53,7 +53,7 @@ def order_json(json1)
 	if json1.is_a?(Array)
 		newArray = Array.new
 		json1.each_with_index {|val, i| newArray[i] = order_json(val) }
-		return json1
+		return newArray
 	elsif json1.is_a?(Hash)
 		newHash = Hash.new
 		json1.each {|key, val| newHash[key] = order_json(val) }
