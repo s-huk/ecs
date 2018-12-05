@@ -1,0 +1,162 @@
+{
+  "index_patterns": ["avm-filebeat-apache_access_log*"],
+  "order" : 99,
+  "settings": {
+    "number_of_shards": 3
+  },
+    "mappings" : {
+      "doc" : {
+        "properties" : {
+          "@timestamp" : {
+            "type" : "date"
+          },
+          "@version" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+          },
+          "beat" : {
+            "properties" : {
+              "hostname" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "name" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "version" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "fields" : {
+            "properties" : {
+              "service_type" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "topic" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "host" : {
+            "properties" : {
+              "name" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "http" : {
+            "properties" : {
+              "method" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "referrer" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "response" : {
+                "properties" : {
+                  "body_sent" : {
+                    "properties" : {
+                      "bytes" : {
+                           "type" : "byte"
+                      }
+                    }
+                  },
+                  "code" : {
+                        "type" : "keyword"
+                  }
+                }
+              },
+              "url" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "version" : {
+                    "type" : "keyword"
+              }
+            }
+          },
+          "input" : {
+            "properties" : {
+              "type" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "offset" : {
+            "type" : "long"
+          },
+          "prospector" : {
+            "properties" : {
+              "type" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "read_timestamp" : {
+            "type" : "date"
+          },
+          "source" : {
+            "properties" : {
+              "ip" : {
+                    "type" : "ip"
+              }
+            }
+          },
+          "user" : {
+            "properties" : {
+              "name" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "user_agent" : {
+            "properties" : {
+              "build" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "device" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "major" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "minor" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "name" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "original" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "os" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "os_name" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          }
+        }
+      }
+    }
+}
