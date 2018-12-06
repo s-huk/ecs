@@ -32,109 +32,20 @@ def flatten_json(y):
     return out
 
 
-
-def get_markdown_section(namespace):
-    namespace.pop('reusable', None)
-    
-    # Table
-#    titles = ['Field']+['<details><summary>'+'['+str(i)+'](# "'+f+'")'+'</summary>'+f.replace('/',' / ')+'</details>' for i, f in enumerate(avm_pipelines)]
-#    if section_name == "base":
-#        for title in titles:
-#           output += "| {}  ".format(title)
-#        output += "|\n"
-#        for title in titles:
-#           output += "|---"
-#        output += "|\n"
-
-
-    #output = '<tr><th align="center" colspan='+str(len(avm_pipelines)+1)+'><h3>'+str(namespace["name"])+'</h2></td></tr>'
-    output = '<tr><th rowspan=2><span title="'+namespace["description"]+'"><h4>'+str(namespace["name"])+'</h4></span></th>'+''.join(['<td colspan='+str(beats[k])+' align="center">'+str(k)+'</td>' for k in sorted(beats.keys())])+'</tr>'
-    output += '<tr>'+''.join(['<td align="center"><span title="'+k+'">'+os.path.basename(k)[:2]+'</span></td>' for k in avm_pipelines])+'</tr>'
-
-    for field in sorted(namespace["fields"], key=lambda field: field["name"]):
-        output += get_markdown_row(field)
-
-
-#    for field in orphans["fields"]:
-#        output += get_markdown_row(field)
-
-#    for field in [f for f in list(avm_must.keys()) if f not in second]  namespace["fields"]:
-#        output += get_markdown_row(field, link, False)
-
-    # output += "\n\n"
-
-    # Footnote
-    # if "footnote" in namespace:
-    #    output += namespace["footnote"].replace("\n", "\n\n") + "\n"
-
-    return output
-
-
 def tr_bad_chars(s):
     return s.replace('"','').replace('[','').replace(']','').replace("\n", "   ")
 
 def get_markdown_row(field):
-    """Creates a markdown table for the given fields
-    """
-
     # Replace newlines with HTML representation as otherwise newlines don't work in Markdown
     description = field["description"].replace("\n", "<\br>").replace('"','').replace('[','').replace(']','')
 
     if "example" in field:
         show_name = '<span title="'+'('+field["type"]+') '+tr_bad_chars(field["description"])+'    EXAMPLE: '+tr_bad_chars(field["example"])+'">'+field["name"]+'</span>'
-        #show_name = '['+field["name"]+'](https://github.com/elastic/ecs "'+tr_bad_chars(field["description"])+'   EXAMPLE: '+tr_bad_chars(field["example"])+'")'+' ('+field["type"]+')'
     else:
         show_name = '<span title="'+'('+field["type"]+') '+tr_bad_chars(field["description"])+'">'+field["name"]+'</span>'
-    #show_name = '<span title="('+field["type"]+')">'+field["name"]+'</span>'
-        #show_name = '['+field["name"]+'](https://github.com/elastic/ecs "'+tr_bad_chars(field["description"])+'")'+' ('+field["type"]+')'
 
-    #show_name.replace("\n", "<\br>").replace('"','').replace('[','').replace(']','')
-
-    # If link is true, it link to the anchor is provided. This is used for the use-cases
-    #if link and ecs:
-        #str_pattern = '| [{}]({}#{})  |'+''.join([' {} |']*len(avm_pipelines))+' {} | {} | {} | {} |\n'
-
-    # By default a anchor is attached to the name
-    #str_pattern = '| <a name="{}"></a>{} |'+''.join([' {} |']*len(avm_pipelines))+' {} | {} | {} |\n'
-    #str_pattern = '| <a name="{}"></a>{} |'+''.join([' {} |']*len(avm_pipelines))+'\n'
-    #str_pattern = '<tr><td><a name="{}"></a>{}</td>'+''.join(['<td> {} </td>']*len(avm_pipelines))+'</tr>\n'
     str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
-    #return str_pattern.format(field["name"], show_name, *[avm_must[f][field["name"]] if field["name"] in avm_must[f] else "" for f in avm_pipelines], description)
-    #avm_must[f][field["name"]]
-    #'[X](# "'+avm_must[f][field["name"]]+'")'
-    #return str_pattern.format(field["name"], show_name, *['[X](# "'+f+': '+avm_must[f][field["name"]]+'")' if field["name"] in avm_must[f] else "CONT" for f in avm_pipelines])
-    #return str_pattern.format(field["name"], show_name, *['[X](# "'+f+': '+str(avm_must[f][field["name"]])+'")' if field["name"] in avm_must[f] else "" for f in avm_pipelines])
     return str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][field["name"]])+'">X</span>' if field["name"] in avm_must[f] else "" for f in avm_pipelines])
-
-
-
-def create_csv(fields, file):
-
-    open_mode = "wb"
-    if sys.version_info >= (3, 0):
-        open_mode = "w"
-
-    # Output schema to csv
-    with open(file, open_mode) as csvfile:
-        schema_writer = csv.writer(csvfile,
-                                   delimiter=',',
-                                   quoting=csv.QUOTE_MINIMAL,
-                                   lineterminator='\n')
-        schema_writer.writerow(["Field", "Type", "Level", "Example"])
-
-        for namespace in fields:
-            if len(namespace["fields"]) == 0:
-                continue
-
-            # Sort fields for easier readability
-            namespaceFields = sorted(namespace["fields"],
-                                     key=lambda field: field["name"])
-
-            # Print fields into a table
-            for field in namespaceFields:
-                schema_writer.writerow([field["name"], field["type"], field["level"], field["example"]])
-
-
 
 
 def clean_namespace_fields(fields):
@@ -193,19 +104,6 @@ def clean_string_field(field, key):
     else:
         field[key] = ""
 
-
-
-#def filtered_fields(fields, groups):
-#    new_fields = copy.deepcopy(fields)
-#    for f in new_fields:
-#        n = 0
-#        for field in list(f["fields"]):
-#            if field["group"] not in groups:
-#                del f["fields"][n]
-#                continue
-#            n = n + 1
-#
-#    return new_fields
 
 
 if __name__ == "__main__":
@@ -273,26 +171,31 @@ if __name__ == "__main__":
         #print( namespace["name"] )
         if len(namespace["fields"]) == 0:
             continue
-        output += get_markdown_section(namespace)
+#        output += get_markdown_section(namespace)
+        output += '<tr><th rowspan=2><span title="'+namespace["description"]+'"><h4>'+str(namespace["name"])+'</h4></span></th>'+''.join(['<td colspan='+str(beats[k])+' align="center">'+str(k)+'</td>' for k in sorted(beats.keys())])+'</tr>'
+        output += '<tr>'+''.join(['<td align="center"><span title="'+k+'">'+os.path.basename(k)[:2]+'</span></td>' for k in avm_pipelines])+'</tr>'
+
+        for field in sorted(namespace["fields"], key=lambda field: field["name"]):
+            output += get_markdown_row(field)
 
     output += "</tbody></table>"
     print( output + "\n\n" )
 
+#ffffffffffffffff
+#    output = "Feld; "
+#    output += '; '.join(avm_pipelines)
 
-    # Generates Markdown for README
-#    if args.stdout == "true":
+    file = root_dir + "/" + "fields.csv"
+    with open(file, "w") as csvfile:
+        schema_writer = csv.writer(csvfile,
+                                   delimiter=';',
+                                   quoting=csv.QUOTE_MINIMAL,
+                                   lineterminator='\n')
+        schema_writer.writerow( ["name","type"]+avm_pipelines )
+        for namespace in sortedNamespaces:
+            for field in sorted(namespace["fields"], key=lambda field: field["name"]):
+                schema_writer.writerow( [field[k] for k in ["name","type"]]+[avm_must[f][field["name"]] if field["name"] in avm_must[f] else "" for f in avm_pipelines] )
 
-    # md out 
-    #groups = [1, 2, 3]
-    #f_fields = filtered_fields(sortedNamespaces, groups)
-    # Print to stdout
-    #print(create_markdown_document(f_fields))
-    
 
-    # Generates schema.csv
-#    else:
 
-    # csv out
-#    groups = [1, 2, 3]
-#    f_fields = filtered_fields(sortedNamespaces, groups)
-#    create_csv(f_fields, "schema.csv")
+
