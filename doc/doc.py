@@ -130,8 +130,10 @@ if __name__ == "__main__":
 
 
     fields = []
-    data = urllib.request.urlopen('https://raw.githubusercontent.com/elastic/ecs/master/fields.yml').read()
-    fields = yaml.load(data)[0]["fields"]    
+    with open(  root_dir+"/doc/fields.yml", 'r') as ecs_fields_yml:
+        fields = yaml.load(ecs_fields_yml)[0]["fields"]
+    #data = urllib.request.urlopen('https://raw.githubusercontent.com/elastic/ecs/master/fields.yml').read()
+    #fields = yaml.load(data)[0]["fields"]
     for path in sorted(glob.glob(root_dir+"doc/avm-schemas/*.yml")):
         with open(path) as f:
             fields = fields + yaml.load(f.read())

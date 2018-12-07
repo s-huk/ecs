@@ -14,6 +14,7 @@
   "bytes_read": "226",
   "captured_request_cookie": "-",
   "captured_response_cookie": "-",
+  "client_ip": "78.55.162.196",
   "client_port": "34378",
   "feconn": "21",
   "fields": {
@@ -35,6 +36,7 @@
   "host": {
     "name": "argo-lb-02"
   },
+  "http_request": "/update.php?ipv4=78.55.162.196&ipv6=",
   "http_status_code": "200",
   "http_verb": "GET",
   "http_version": "1.1",
@@ -49,9 +51,6 @@
   },
   "retries": "0",
   "server_name": "argo-app-01",
-  "source": {
-    "ip": "78.55.162.196"
-  },
   "srv_queue": "0",
   "srvconn": "3",
   "syslog_server": "argo-lb-02",
@@ -61,8 +60,5 @@
   "time_backend_response": "7",
   "time_duration": "8",
   "time_queue": "0",
-  "time_request": "1",
-  "url": {
-    "path": "/update.php?ipv4=78.55.162.196&ipv6="
-  }
+  "time_request": "1"
 }
