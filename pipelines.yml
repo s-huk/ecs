@@ -40,7 +40,11 @@
 
 - pipeline.id: winlogbeat
   path.config: "/etc/logstash/avm-git/pipelines/winlogbeat/winlog-legacy.conf"
-  
+
+### Palo Alto
+
+- pipeline.id: paloalto_traffic
+  path.config: "/etc/logstash/avm-git/pipelines/paloalto/paloalto_traffic-ecs.conf
 
 ### KAFKA INPUT ###
 
@@ -54,4 +58,4 @@
   path.config: "/etc/logstash/avm-git/pipelines/packetbeat.conf"
   
 - pipeline.id: paloalto_input
-  path.config: "/etc/logstash/avm-git/pipelines/palo_alto.conf"
+  path.config: "/etc/logstash/avm-git/pipelines/paloalto.conf"
