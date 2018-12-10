@@ -8,25 +8,25 @@ usage() {
 	echo 'Testen von Logstash-Filtern (d.h. *.conf Dateien mit dazugehoerigen JSON-Vorgaben innerhalb eines anzugebenden Testbundle-Ordners).'
 	echo
 	echo 'Benutzung:'
-	echo '  $(basename '$0') [<testbundle-rootdir=testing>] [<pfadmuster1-zu-*.conf-files> <pfadmuster2-zu-*.conf-files> ...]'
+	echo '  '$(basename "$0")' [<testbundle-rootdir=testing>] [<pfadmuster1-zu-*.conf-files> <pfadmuster2-zu-*.conf-files> ...]'
 	echo
 	echo 'Beispiele:'
-	echo '  1) $(basename '$0')'
+	echo '  1) '$(basename "$0")''
 	echo '     => testet jede Conf in pipelines/*/*.conf gegen passenden JSON-Input in testing/pipelines/*/*.json'
 	echo
-	echo '  2) $(basename '$0') pipelines/*/*.conf'
+	echo '  2) '$(basename "$0")' pipelines/*/*.conf'
 	echo '     => wie 1) - hier wurde das Default-Pfadmuster zu den Confs explizit angegeben'
 	echo
-	echo '  3) $(basename '$0') testing'
+	echo '  3) '$(basename "$0")' testing'
 	echo '     => wie 1) - hier wurde explizit angegeben, dass mit JSON-Inputs aus testing/pipelines/*/*.json zu testen ist'
 	echo
-	echo '  4) $(basename '$0') testing/myCustomJSONs pipelines/{filebeat,metricbeat}/ha*.conf'
+	echo '  4) '$(basename "$0")' testing/myCustomJSONs pipelines/{filebeat,metricbeat}/ha*.conf'
 	echo '     => testet jede Conf in pipelines/{filebeat,metricbeat}/ha*.conf gegen passenden JSON-Input aus testing/myCustomJSONs/pipelines/*.json'
 	echo
-	echo '  5) $(basename '$0') testing/myCustomJSONs pipelines/filebeat/ha*.conf pipelines/metricbeat/ha*.conf'
+	echo '  5) '$(basename "$0")' testing/myCustomJSONs pipelines/filebeat/ha*.conf pipelines/metricbeat/ha*.conf'
 	echo '     => wie 4)'
 	echo
-	echo '  6) $(basename '$0') pipelines/{filebeat,metricbeat}/ha*.conf'
+	echo '  6) '$(basename "$0")' pipelines/{filebeat,metricbeat}/ha*.conf'
 	echo '     => testet jede Conf in pipelines/{filebeat,metricbeat}/ha*.conf gegen passenden JSON-Input in testing/pipelines/*/*.json'
 	echo
 	echo 'Hinweis:'
