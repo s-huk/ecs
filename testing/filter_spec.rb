@@ -32,7 +32,7 @@ require 'json'
 require 'diffy' #require_relative 'logstash/vendor/jruby/lib/ruby/gems/shared/gems/diffy-3.2.1/lib/diffy'
 
 def compare_json(json1, json2)
-	if(json1.is_a?(Array) && json2.is_a?(Array) && json1.count == json2.count) 
+	if(json1.is_a?(Array) && json2.is_a?(Array) && json1.count == json2.count)
 		json1.each_with_index do |obj, index|
 			json1_obj, json2_obj = obj, json2[index]
 			result = compare_json(json1_obj, json2_obj)
@@ -40,9 +40,9 @@ def compare_json(json1, json2)
 		end
 	elsif(json1.is_a?(Hash) && json2.is_a?(Hash) && json1.count == json2.count)
 		json1.each do |key,value|
-			return false unless json2.has_key?(key) and compare_json(value, json2[key])		
+			return false unless json2.has_key?(key) and compare_json(value, json2[key])
 		end
-	else 
+	else
 		return false if not json1 == json2
 	end
 	return true
@@ -68,12 +68,12 @@ def withdraw_comments(json_lines)
 	# Kommentare zeilenweise herausfiltern - Matching von Quotings mit Hilfe von Lookbehind: +((?<![\\])['"])((?:.(?!(?<![\\])\2))*.?)\2
 	json_lines.each_line do |line|
 		if line =~ /^((((?<![\\])['"])(?:.(?!(?<![\\])\3))*.?\3|[A-Za-z0-9,.: \t}{\[\]]*+)+)(\#.*)?$/
-			next if $1 == nil # $1 = JSON-Zeile ohne Kommentar  $4 = Kommentar 
+			next if $1 == nil # $1 = JSON-Zeile ohne Kommentar  $4 = Kommentar
 			resJson += $1
-		else 
+		else
 			resJson += line
 		end
-	end	
+	end
 	return resJson
 end
 
@@ -119,7 +119,7 @@ Dir["../../"+ENV["LOGSTASH_TESTING_CONF_PATTERN"]].each { |conf_path|
 				else
 					json_must = JSON.parse("{}")
 				end
-				
+
 				json_result = JSON.parse( subject.to_json )
 				if not compare_json(json_result, json_must)
 					puts "\n\n######################\nFilter-Konfiguration:\n######################\n"+flines
@@ -131,10 +131,11 @@ Dir["../../"+ENV["LOGSTASH_TESTING_CONF_PATTERN"]].each { |conf_path|
 					else
 						puts "\n\n++++++++++++++++++++++++++++++++++++++\nErgebnis inkl. erwarteter Anpassungen:\n++++++++++++++++++++++++++++++++++++++\n"
 						puts Diffy::Diff.new(pretty_result, pretty_must) .to_s(:color)+"\n\n"
+						puts pretty_result+"\n\n"
 						expect( compare_json(json_result, json_must) ).to be true
 					end
-				end 
-				
+				end
+
 				#    File.open(Dir.pwd + "/../bundle01/fail2ban_result.json","w") do |f|
 				#        f.write(JSON.pretty_generate(json_result))
 				#    end
@@ -142,7 +143,7 @@ Dir["../../"+ENV["LOGSTASH_TESTING_CONF_PATTERN"]].each { |conf_path|
 		end
 	}
 }
-  
+
 puts
 
 
