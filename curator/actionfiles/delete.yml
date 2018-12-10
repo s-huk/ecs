@@ -58,7 +58,7 @@ actions:
       source: creation_date
       direction: older
       unit: days
-      unit_count: 8
+      unit_count: 4
   5:
     action: delete_indices
     description: delete filebeat-auth_log-*
