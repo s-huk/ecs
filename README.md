@@ -62,7 +62,9 @@ Benennungsmuster der JSON-Dateien:
 
 Conf- und JSON-Files werden als zueinander passend betrachtet und getestet, wenn der Base-Filename (d.h. conf_filename_ohne_extension) und auch der relative Pfad zum jeweiligen pipelines-Ordner gleich sind.
 
+#### Dokumentation aktualisieren
 
+Nach dem Verändern von Pipelines sollte stets die Dokumentation (diese README.md) generiert und ins mit ins git eingecheckt werden werden. Die Dokumentation kann mittels `./run-doc-generation.sh`
 
 #### Curator Konfiguration
 
