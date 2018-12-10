@@ -19,6 +19,18 @@ root_dir = os.path.abspath(sys.path[0]+'/../') +"/"
 #list all pipeline names according to the pattern pipelines/<beat>/<conf-filename-without-extension> - e.g. pipelines/filebeat/fail2ban-legacy
 avm_pipelines = [ m[len(root_dir):-5] for m in glob.glob(root_dir+"pipelines/*/*.conf") if not os.path.isdir(m) ]
 
+comment_pattern = re.compile(r"^((((?<![\\])['\"])(?:.(?!(?<![\\])\3))*.?\3|[A-Za-z0-9,.: \t}{\[\]]*)+)(\#.*)?$")
+
+def withdraw_comments(json_lines):
+    resJson = ""
+    # Filter comments - through quote matching by means of lookbehind: +((?<![\\])['"])((?:.(?!(?<![\\])\2))*.?)\2
+    for line in json_lines:
+        res = comment_pattern.match(line)
+        if res:
+            resJson += res.group(1)
+        else:
+            resJson += line
+    return resJson
 
 def flatten_json(y):
     out = {}
@@ -118,7 +130,7 @@ if __name__ == "__main__":
     #    for json_path in sorted( glob.glob(root_dir+'testing/'+f+"_"+EXAMPLE_JSON_IDENTIFIER+"must.json") ):
         for json_path in sorted( glob.glob(root_dir+'testing/'+f+"_*must.json") ):
             with open(  json_path, 'r') as must_file:
-                avm_must[f] = flatten_json( json.load(must_file) )
+                avm_must[f] = flatten_json(  json.loads( withdraw_comments(must_file) )  )
             break
     # parse fields from the *.conf file
     #    for line in open(root_dir+f+'.conf', 'r').readlines():
@@ -183,7 +195,6 @@ if __name__ == "__main__":
     output += "</tbody></table>"
     print( output + "\n\n" )
 
-#ffffffffffffffff
 #    output = "Feld; "
 #    output += '; '.join(avm_pipelines)
 
