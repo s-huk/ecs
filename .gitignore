@@ -1,1 +1,3 @@
 testing/logstash
+*.pyc
+.venv/

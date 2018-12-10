@@ -32,6 +32,10 @@ usage() {
 	echo 'Hinweis:'
 	echo '     - Bash-Completion ist anwendbar'
 	echo
+	echo 'Weitere Befehle:'
+	echo '     - $(basename '$0') -i   => Initialisiert die notwendige Test-Umgebung.'
+	echo '     - $(basename '$0') -h   => Zeigt diese Hilfe.'
+	echo
 	exit 1
 }
 
@@ -47,7 +51,7 @@ init() {
 	cd logstash
 	./bin/logstash-plugin install --development
 	cp logstash-core/versions-gem-copy.yml logstash-core-plugin-api
-	if ! [[ "$PATH" =~ "logstash/vendor/jruby/bin" ]]; then 
+	if ! [[ "$PATH" =~ "logstash/vendor/jruby/bin" ]]; then
 		export PATH="$testing_dir/logstash/vendor/jruby/bin:$PATH"
 	fi
 
@@ -57,6 +61,22 @@ init() {
 	bundle install
 	#gem install logstash-core-plugin-api
 }
+
+
+# print usage on parameter -h
+while getopts 'hi' option; do
+	case "$option" in
+		h) usage
+		exit;;
+		i) init
+		exit;;
+		\?) echo "illegal option: -$OPTARG"
+		usage
+		exit;;
+	esac
+done
+shift $((OPTIND - 1))
+
 
 # check necessity for initialization
 if [ ! -d "$testing_dir/logstash" ]; then
@@ -70,18 +90,6 @@ if [ ! -d "$testing_dir/logstash" ]; then
 	done
 fi
 
-# print usage on parameter -h
-while getopts ':h' option; do
-	case "$option" in
-		h) usage
-		exit;;
-		\?) echo "illegal option: -$OPTARG"
-		usage
-		exit;;
-	esac
-done
-shift $((OPTIND - 1))
-
 
 # parse optional testbundle and conf-pattern args
 function join { local IFS="$1"; shift; echo "$*"; }
@@ -92,7 +100,7 @@ if [[ "$1" != testing* ]]; then
 	if [ "$1" ]; then
 		conf_pattern="$(join , ${@:1})"
 	fi
-else 
+else
 	if [ "$2" ]; then
 		conf_pattern="$(join , ${@:2})"
 	fi
@@ -112,7 +120,7 @@ echo
 export LOGSTASH_TESTING_CONF_PATTERN="{$conf_pattern}"
 export LOGSTASH_TESTING_TESTBUNDLE_DIR="$testbundle_dir"
 
-if ! [[ "$PATH" =~ "logstash/vendor/jruby/bin" ]]; then 
+if ! [[ "$PATH" =~ "logstash/vendor/jruby/bin" ]]; then
 	export PATH="$testing_dir/logstash/vendor/jruby/bin:$PATH"
 #	export PATH="$testing_dir/logstash/vendor/bundle/jruby/bin:$PATH"
 	export LOGSTASH_HOME="$testing_dir/logstash"

@@ -8,7 +8,7 @@ import glob
 import re
 import os
 import re
-import json 
+import json
 import sys
 import urllib.request
 from functools import reduce
@@ -151,7 +151,7 @@ if __name__ == "__main__":
             fields = fields + yaml.load(f.read())
 
     clean_namespace_fields(fields)
-    
+
     # Load all fields into object
     sortedNamespaces = sorted(fields, key=lambda field: field["group"])
     #print (sortedNamespaces)
@@ -166,16 +166,16 @@ if __name__ == "__main__":
     #print()
     #print ( orphaned )
     sortedNamespaces.append(orphaned)
-    
+
     # Create markdown schema output string
     output = ""
-    
+
     avm_pipelines.sort()
     beats = {}
     for beat in [os.path.basename(os.path.dirname(f)) for f in avm_pipelines]:
         beats[beat] = beats.get(beat, 0) + 1
 
-    output = '<table>'    
+    output = '<table>'
     #output += '<thead>'
 #    output += '<tr><th rowspan=2>Field</th>'+''.join(['<th colspan='+str(beats[k])+'>'+str(k)+'</th>' for k in sorted(beats.keys())])+'</tr>'
 #    output += '<tr>'+''.join(['<th><span title="'+k+'">'+os.path.basename(k)[:1]+'</span></th>' for k in avm_pipelines])+'</tr>'
