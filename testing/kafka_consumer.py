@@ -64,12 +64,18 @@ def consume():
             print(msg.error())
             break
 
-    # print message
+    # read message details
     msg_ts = None
     if msg.timestamp()[0] != TIMESTAMP_NOT_AVAILABLE:
       msg_ts = datetime.fromtimestamp(msg.timestamp()[1]/1000).strftime('%Y-%m-%d %H:%M:%S')
 
-    msg_value = msg.value().decode('utf-8')
+    msg_key = msg.key()
+    if msg_key:
+      msg_key = msg_key.decode('utf-8')
+
+    msg_value = msg.value()
+    if msg_value:
+      msg_value = msg_value.decode('utf-8')
     if args.prettify:
       try:
         msg_value = json.dumps(json.loads(msg_value), indent=2, sort_keys=True)
@@ -91,6 +97,7 @@ def consume():
     if not matches:
       continue
 
+    # print the message details
     print("""
 ==========================
 topic={}
@@ -106,7 +113,7 @@ key={}
       msg.partition(),
       msg.offset(),
       msg_ts,
-      msg.key().decode('utf-8'),
+      msg_key,
       msg_value
     )
   )
