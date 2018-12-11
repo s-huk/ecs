@@ -1,0 +1,235 @@
+{
+  "index_patterns": ["avm-paloalto-pa_traffic*"],
+  "order" : 99,
+  "settings": {
+    "number_of_shards": 3
+  },
+    "mappings" : {
+      "doc" : {
+        "properties" : {
+          "@timestamp" : {
+            "type" : "date"
+          },
+          "@version" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+          },
+          "client" : {
+            "properties" : {
+              "bytes" : {
+                    "type" : "integer"
+              },
+              "packets" : {
+                    "type" : "integer"
+              }
+            }
+          },
+          "destination" : {
+            "properties" : {
+              "ip" : {
+                    "type" : "ip"
+              },
+              "port" : {
+                    "type" : "integer"
+              },
+              "user" : {
+                "properties" : {
+                  "name" : {
+                        "type" : "keyword",
+                        "ignore_above" : 256
+                  }
+                }
+              }
+            }
+          },
+          "event" : {
+            "properties" : {
+              "category" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "duration" : {
+                    "type" : "integer"
+              },
+              "id" : {
+                    "type" : "integer"
+              },
+              "start" : {
+                "type" : "date",
+                "format" : "yyyy/MM/dd HH:mm:ss||yyyy/MM/dd||epoch_millis"
+              }
+            }
+          },
+          "fields" : {
+            "properties" : {
+              "service_type" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "host" : {
+            "properties" : {
+              "ip" : {
+                    "type" : "ip"
+              },
+              "name" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "log" : {
+            "properties" : {
+              "level" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "network" : {
+            "properties" : {
+              "application" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "bytes" : {
+                    "type" : "integer"
+              },
+              "packets" : {
+                    "type" : "integer"
+              },
+              "protocol" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "paloalto" : {
+            "properties" : {
+              "action" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "destination" : {
+                "properties" : {
+                  "location" : {
+                        "type" : "keyword",
+                        "ignore_above" : 256
+                  },
+                  "nat" : {
+                    "properties" : {
+                      "ip" : {
+                            "type" : "ip"
+                      },
+                      "port" : {
+                            "type" : "integer"
+                      }
+                    }
+                  },
+                  "network" : {
+                    "properties" : {
+                      "interface" : {
+                            "type" : "keyword",
+                            "ignore_above" : 256
+                      },
+                      "name" : {
+                            "type" : "keyword",
+                            "ignore_above" : 256
+                      }
+                    }
+                  }
+                }
+              },
+              "network" : {
+                "properties" : {
+                  "category" : {
+                        "type" : "keyword",
+                        "ignore_above" : 256
+                  }
+                }
+              },
+              "policy" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "rule" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "session" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              },
+              "source" : {
+                "properties" : {
+                  "location" : {
+                        "type" : "keyword",
+                        "ignore_above" : 256
+                  },
+                  "nat" : {
+                    "properties" : {
+                      "ip" : {
+                            "type" : "ip"
+                      },
+                      "port" : {
+                            "type" : "integer"
+                      }
+                    }
+                  },
+                  "network" : {
+                    "properties" : {
+                      "interface" : {
+                            "type" : "keyword",
+                            "ignore_above" : 256
+                      },
+                      "name" : {
+                            "type" : "keyword",
+                            "ignore_above" : 256
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "palotalto" : {
+            "properties" : {
+              "traffic" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+              }
+            }
+          },
+          "server" : {
+            "properties" : {
+              "bytes" : {
+                    "type" : "integer"
+              },
+              "packets" : {
+                    "type" : "integer"
+              }
+            }
+          },
+          "source" : {
+            "properties" : {
+              "ip" : {
+                    "type" : "ip"
+              },
+              "port" : {
+                    "type" : "integer"
+              },
+              "user" : {
+                "properties" : {
+                  "name" : {
+                        "type" : "keyword",
+                        "ignore_above" : 256
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
