@@ -1,5 +1,5 @@
 ---
-- name: avm.fritzos.metadata
+- name: avm_fritzos_metadata
   title: FRITZ!OS Metadata
   description: >
     Metadata representation of AVM device models with FRITZ!OS.
@@ -56,19 +56,19 @@
     - name: language
       type: keyword
       description: >
-        The language configured in FRITZ!OS encoded according to [1, ISO639 alpha-2] language code (e.g. ”de”, ”en”)
+        The language configured in FRITZ!OS encoded according to [ISO639 alpha-2] language code (e.g. ”de”, ”en”)
     - name: country
       type: keyword
       description: >
-        The country code that exposes the location of the AVM product. This is encoded according to [3, ISO 3166 alpha-2] country code (e.g. ”DE”, ”EN”)
+        The country code that exposes the location of the AVM product. This is encoded according to [ISO 3166 alpha-2] country code (e.g. ”DE”, ”EN”)
     - name: time_zone
       type: keyword
       description: >
-        The time shift configured in FRITZ!OS relative to Coordinated Universal Time (UTC) according to [2, ISO 8601] (e.g. ”+1:00”)
+        The time shift configured in FRITZ!OS relative to Coordinated Universal Time (UTC) according to [ISO 8601] (e.g. ”+1:00”)
     - name: calling_code
       type: keyword
       description: >
-        The international Country Calling Code as string value according to [4, ITU-T E.164] (e.g. ”+49”).
+        The international Country Calling Code as string value according to [ITU-T E.164] (e.g. ”+49”).
     - name: provider_key
       type: keyword
       description: >
@@ -89,3 +89,8 @@
       type: keyword
       description: >
         The flags configured in FRITZ!OS as array of strings.
+    ######### statistical extension
+    - name: fw
+      type: keyword
+      description: >
+        The human-readable firmeware version of the FRITZ!OS executed on the AVM product.

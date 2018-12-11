@@ -1,26 +1,26 @@
 {
   "@timestamp": "2018-12-10T23:35:52.145Z",
-  "box": {
+  "avm_fritzos_metadata": {
     "buildnumber": 61760,
     "buildtype": 1,
     "fw": "07.01",
-    "fw1": 149,
-    "fw2": 7,
-    "fw3": 1,
-    "hw": 221,
-    "name": "FRITZ!Box 7560",
+    "hardware_id": 221,
+    "maca": "7CFF4DAFE9CE",
+    "major": 149,
+    "minor": 7,
     "oem": "avm",
-    "provider": "htpdsl_vdsl",
-    "serial": "7CFF4DAFE9CE"
+    "patch": 1,
+    "product_name": "FRITZ!Box 7560",
+    "provider_key": "htpdsl_vdsl"
   },
   "fw-update": {
     "end": "1970-01-01T00:30:39Z",
     "from_version": {
       "buildnumber": 47573,
       "fw": "06.92",
-      "fw1": 149,
-      "fw2": 6,
-      "fw3": 92
+      "major": 149,
+      "minor": 6,
+      "patch": 92
     },
     "initiator": "192.168.178.20",
     "initiator_hostname": "",
@@ -35,27 +35,25 @@
     "to_version": {
       "buildnumber": 61760,
       "fw": "07.01",
-      "fw1": 149,
-      "fw2": 7,
-      "fw3": 1
+      "major": 149,
+      "minor": 7,
+      "patch": 1
     }
   },
-  "geoip": {
-    "city_name": "Peine",
-    "continent_code": "EU",
-    "country_code2": "DE",
-    "country_code3": "DE",
-    "country_name": "Germany",
-    "location": {
-      "lat": 52.3143,
-      "lon": 10.2336
+  "source": {
+    "domain": "a89-182-228-254.net-htp.de.",
+    "geo": {
+      "city_name": "Peine",
+      "country_iso_code": "DE",
+      "country_name": "Germany",
+      "location": {
+        "lat": 52.3143,
+        "lon": 10.2336
+      },
+      "region_name": "Lower Saxony"
     },
-    "postal_code": "31226",
-    "region_name": "Lower Saxony",
-    "timezone": "Europe/Berlin"
+    "ip": "89.182.228.254",
+    "network": "HTP-DYN-DSL"
   },
-  "hostname": "a89-182-228-254.net-htp.de.",
-  "ipv4": "89.182.228.254",
-  "network": "HTP-DYN-DSL",
   "version": 1
 }
