@@ -17,7 +17,7 @@
           "client" : {
             "properties" : {
               "bytes" : {
-                    "type" : "integer"
+                    "type" : "long"
               },
               "packets" : {
                     "type" : "integer"
@@ -94,7 +94,7 @@
                     "ignore_above" : 256
               },
               "bytes" : {
-                    "type" : "integer"
+                    "type" : "long"
               },
               "packets" : {
                     "type" : "integer"
@@ -204,7 +204,7 @@
           "server" : {
             "properties" : {
               "bytes" : {
-                    "type" : "integer"
+                    "type" : "long"
               },
               "packets" : {
                     "type" : "integer"
