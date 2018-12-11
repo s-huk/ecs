@@ -115,7 +115,8 @@ actions:
       kind: prefix
       value: avm-paloalto-pa_traffic-
     - filtertype: age
-      source: creation_date
+      source: name
       direction: older
+      timestring: '%Y.%m.%d'
       unit: days
       unit_count: 3      
