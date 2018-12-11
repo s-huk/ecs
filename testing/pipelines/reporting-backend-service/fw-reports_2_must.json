@@ -16,7 +16,7 @@
   "fw-update": {
     "end": "1970-01-01T00:30:39Z",
     "from_version": {
-      "buildnumber": 47573,
+      "buildnumber_lit": "foo123",
       "fw": "06.92",
       "fw1": 149,
       "fw2": 6,
@@ -33,7 +33,7 @@
     "start": "1970-01-01T00:01:41Z",
     "success": true,
     "to_version": {
-      "buildnumber": 61760,
+      "buildnumber_lit": "456bar",
       "fw": "07.01",
       "fw1": 149,
       "fw2": 7,
