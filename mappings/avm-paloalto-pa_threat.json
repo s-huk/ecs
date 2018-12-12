@@ -50,8 +50,7 @@
               "format": "yyyy/MM/dd HH:mm:ss||yyyy/MM/dd||epoch_millis"
             },
             "id": {
-              "type": "keyword",
-              "ignore_above": 256
+              "type": "integer"
             }
           }
         },
