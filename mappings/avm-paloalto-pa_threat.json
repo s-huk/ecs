@@ -30,7 +30,12 @@
               "type": "integer"
             },
             "user": {
-              "type": "object"
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
             }
           }
         },
@@ -59,7 +64,12 @@
           }
         },
         "file": {
-          "type": "object"
+          "properties": {
+            "extension": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         },
         "host": {
           "properties": {
@@ -75,7 +85,16 @@
         "http": {
           "properties": {
             "request": {
-              "type": "object"
+              "properties": {
+                "method": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                },
+                "referrer": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
             }
           }
         },
@@ -223,7 +242,12 @@
           }
         },
         "user_agent": {
-          "type": "object"
+          "properties": {
+            "original": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         }
       }
     }
