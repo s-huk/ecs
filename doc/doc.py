@@ -19,7 +19,7 @@ root_dir = os.path.abspath(sys.path[0]+'/../') +"/"
 #list all pipeline names according to the pattern pipelines/<beat>/<conf-filename-without-extension> - e.g. pipelines/filebeat/fail2ban-legacy
 avm_pipelines = [ m[len(root_dir):-5] for m in glob.glob(root_dir+"pipelines/*/*.conf") if not os.path.isdir(m) ]
 
-comment_pattern = re.compile(r"^((((?<![\\])['\"])(?:.(?!(?<![\\])\3))*.?\3|[A-Za-z0-9,.: \t}{\[\]]*)+)(\#.*)?$")
+comment_pattern = re.compile(r"^((((?<![\\])['\"])(?:.(?!(?<![\\])\3))*.?\3|[A-Za-z0-9,.: \t=>}{\[\]]*)+)(\#.*)?$")
 
 def withdraw_comments(json_lines):
     resJson = ""
