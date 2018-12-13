@@ -126,12 +126,12 @@ if __name__ == "__main__":
     avm_must = {}
     for f in avm_pipelines:
     #    avm_examples[f] = []
-        avm_must[f] = []
+        avm_must[f] = {}
     #    for json_path in sorted( glob.glob(root_dir+'testing/'+f+"_"+EXAMPLE_JSON_IDENTIFIER+"must.json") ):
         for json_path in sorted( glob.glob(root_dir+'testing/'+f+"_*must.json") ):
             with open(  json_path, 'r') as must_file:
-                avm_must[f] = flatten_json(  json.loads( withdraw_comments(must_file) )  )
-            break
+                avm_must[f].update( flatten_json(  json.loads( withdraw_comments(must_file) )  ) )
+            #break:
     # parse fields from the *.conf file
     #    for line in open(root_dir+f+'.conf', 'r').readlines():
     #        avm_must[f] = avm_must[f]+[ma.group(1).replace('][','.').replace('[','').replace(']','') for ma in p.finditer(line)]

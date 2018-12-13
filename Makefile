@@ -9,6 +9,7 @@ apt:
 
 .venv: apt
 	if [ ! -e ".venv/bin/activate_this.py" ] ; then python3 -m venv --clear .venv ; fi
+#	if [ ! -e ".venv/bin/activate_this.py" ] ; then virtualenv --clear .venv ; fi
 
 deps: .venv
 	. .venv/bin/activate && pip3 install -U -r requirements.txt
