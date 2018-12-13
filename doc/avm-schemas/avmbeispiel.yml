@@ -12,8 +12,9 @@
       type: keyword
       description: >
         Dies ist die Beschreibung des Testfeldes.
-
         Dies ist eine weitere Zeile der Beschreibung des Testfeldes.
+      mapping-parameter:
+        fielddata: false
 
     - name: test2
       level: core
