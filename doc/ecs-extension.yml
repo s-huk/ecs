@@ -1,0 +1,14 @@
+---
+#global mapping parameters
+coerce: false
+ignore_malformed: true
+fields: #slated for ecs fields (avm fields would nevertheless also be possible)
+  - name: message
+    fielddata: true
+  - name: agent
+    fields:
+    - name: version
+      coerce: true
+    - name: name
+      fielddata: true
+      ignore_above: 123
