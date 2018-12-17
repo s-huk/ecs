@@ -45,6 +45,9 @@
 
 - pipeline.id: paloalto_traffic
   path.config: "/etc/logstash/avm-git/pipelines/paloalto/paloalto_traffic-ecs.conf"
+  
+- pipeline.id: paloalto_threat
+  path.config: "/etc/logstash/avm-git/pipelines/paloalto/paloalto_threat-ecs.conf"
 
 ### KAFKA INPUT ###
 

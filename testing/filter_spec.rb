@@ -67,9 +67,9 @@ def withdraw_comments(json_lines)
 	resJson = ""
 	# Kommentare zeilenweise herausfiltern - Matching von Quotings mit Hilfe von Lookbehind: +((?<![\\])['"])((?:.(?!(?<![\\])\2))*.?)\2
 	json_lines.each_line do |line|
-		if line =~ /^((((?<![\\])['"])(?:.(?!(?<![\\])\3))*.?\3|[A-Za-z0-9,.: \t}{\[\]]*+)+)(\#.*)?$/
+		if line =~ /^((((?<![\\])['"])(?:.(?!(?<![\\])\3))*.?\3|[A-Za-z0-9,.: \t=>}{\[\]]*+)+)(\#.*)?$/
 			next if $1 == nil # $1 = JSON-Zeile ohne Kommentar  $4 = Kommentar
-			resJson += $1
+			resJson += $1+"\n"
 		else
 			resJson += line
 		end
@@ -85,15 +85,15 @@ Dir["../../"+ENV["LOGSTASH_TESTING_CONF_PATTERN"]].each { |conf_path|
     relative_path_prefix = conf_path.chomp('.conf').sub(/^\.\.\/\.\.\//, '')
 
     puts "DISCOVERED FILTER CONFIG FILE: "+relative_path_prefix+".conf"
-	Dir["../../"+ENV["LOGSTASH_TESTING_TESTBUNDLE_DIR"]+"/"+relative_path_prefix+"_*in.json"].each { |in_path|
+	Dir["../../"+ENV["LOGSTASH_TESTING_TESTBUNDLE_DIR"]+"/"+relative_path_prefix+"_*_in.json"].each { |in_path|
         puts "  |->DISCOVERED JSON INPUT FILE: "+in_path.sub(/^\.\.\/\.\.\//, '')
 		file_id = ""
-		if in_path =~ /^.*#{relative_path_prefix}_(.*)in.json$/im
+		if in_path =~ /^.*#{relative_path_prefix}_(.*)_in.json$/im
 			file_id = $1
 		end
 		describe "test filter conf: "+relative_path_prefix+"_"+file_id do
 			file = File.open(conf_path, 'rb')
-			fileLines = file.read
+			fileLines = withdraw_comments( file.read )
 			file.close
 
 			if fileLines =~ /^.*\n[ \t]*(filter[ \t]*{.*)\n[ \t]*output[ \t]*{.*$/im   # i:ignore case, m:match all characters esp. \n
@@ -110,9 +110,9 @@ Dir["../../"+ENV["LOGSTASH_TESTING_CONF_PATTERN"]].each { |conf_path|
 
 			sample json_in_kafka do # subject.class ist LogStash::Event
 				#insist { subject.get('test') } == ('testwert')
-                if File.file?("../../"+ENV["LOGSTASH_TESTING_TESTBUNDLE_DIR"]+"/"+relative_path_prefix+"_"+file_id+"must.json")
-                    fileJson = File.open("../../"+ENV["LOGSTASH_TESTING_TESTBUNDLE_DIR"]+"/"+relative_path_prefix+"_"+file_id+"must.json", "rb")
-					#strJson = fileJson.read
+                must_filename = "../../"+ENV["LOGSTASH_TESTING_TESTBUNDLE_DIR"]+"/"+relative_path_prefix+"_"+file_id+"_must.json"
+                if File.file?(must_filename)
+                    fileJson = File.open(must_filename, "rb")
 					strJson = withdraw_comments(fileJson.read)
 					json_must = JSON.parse(strJson)
 					fileJson.close

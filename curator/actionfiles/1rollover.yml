@@ -69,12 +69,12 @@ actions:
         max_age: 30d
         #max_docs: 5000
         max_size: 40gb
-  8:
-    action: rollover
-    description:  avm-paloalto-pa_traffic Rollover
-    options:
-      name: avm-paloalto-pa_traffic
-      conditions:
-        max_age: 1d
-        #max_docs: 5000
-        max_size: 40gb        
+#  8:
+#    action: rollover
+#    description:  avm-paloalto-pa_traffic Rollover
+#    options:
+#      name: avm-paloalto-pa_traffic
+#      conditions:
+#        max_age: 1d
+#        #max_docs: 5000
+#        max_size: 40gb        
