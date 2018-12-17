@@ -1,8 +1,25 @@
 ---
-#global mapping parameters
+########################################
+# global mapping parameters:
+########################################
 coerce: false
 ignore_malformed: true
-fields: #slated for ecs fields (avm fields would nevertheless also be possible)
+
+
+
+fields:
+
+########################################
+# additional fields (with type):
+########################################
+  - name: "@version"
+    description: >
+      Beat version
+    type: integer
+
+########################################
+# ecs mapping extensions (without type):
+########################################
   - name: message
     fielddata: true
   - name: agent
@@ -12,3 +29,10 @@ fields: #slated for ecs fields (avm fields would nevertheless also be possible)
     - name: name
       fielddata: true
       ignore_above: 123
+  - name: http
+    fields:
+    - name: response
+      fielddata: false
+      fields:
+      - name: status_code
+        coerce: true

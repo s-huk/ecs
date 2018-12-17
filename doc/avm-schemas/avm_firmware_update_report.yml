@@ -1,15 +1,16 @@
 ---
-- name: avm_firmware_update_report
-  title: Firmware Update Report from FRITZ!OS
-  description: >
-    FRITZ!OS sends a Report after each Firmware Update.
-    Details available here https://wiki.avm.de/x/h4N5AQ.
-    This type describes the transformed 'fw-update' Object
-    after applying the logstash filters.
-  type: group
-  fields:
-    - name: name
-      type: keyword
-      description: >
-        The human-readable name of an AVM product.
-    ## TODO
+fields:
+  - name: avm_firmware_update_report
+    title: Firmware Update Report from FRITZ!OS
+    description: >
+      FRITZ!OS sends a Report after each Firmware Update.
+      Details available here https://wiki.avm.de/x/h4N5AQ.
+      This type describes the transformed 'fw-update' Object
+      after applying the logstash filters.
+    type: group
+    fields:
+      - name: name
+        type: keyword
+        description: >
+          The human-readable name of an AVM product.
+      ## TODO
