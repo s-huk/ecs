@@ -1,58 +1,59 @@
 ---
-- name: avm_firmware_update_report
-  title: Firmware Update Report from FRITZ!OS
-  description: >
-    FRITZ!OS sends a Report after each Firmware Update.
-    Details available here https://wiki.avm.de/x/h4N5AQ.
-    This type describes the transformed 'fw-update' Object
-    after applying the logstash filters.
-  type: group
-  fields:
-    - name: method
-      type: keyword
-    - name: start
-      type: date
-    - name: end
-      type: date
-    - name: success
-      type: boolean
-    - name: reboot
-      type: date
-    - name: reboot_reason
-      type: keyword
-    - name: install_return
-      type: short
-    - name: install_returned
-      type: date
-    - name: initiator
-      type: ip
-    - name: initiator_hostname
-      type: keyword
-    - name: initiator_network
-      type: keyword
-    - name: from_version
-      type: group
-      fields:
-        - name: buildnumber
-          type: integer
-        - name: major
-          type: short
-        - name: minor
-          type: short
-        - name: patch
-          type: short
-        - name: fw
-          type: keyword
-    - name: to_version
-      type: group
-      fields:
-        - name: buildnumber
-          type: integer
-        - name: major
-          type: short
-        - name: minor
-          type: short
-        - name: patch
-          type: short
-        - name: fw
-          type: keyword
+fields:
+  - name: avm_firmware_update_report
+    title: Firmware Update Report from FRITZ!OS
+    description: >
+      FRITZ!OS sends a Report after each Firmware Update.
+      Details available here https://wiki.avm.de/x/h4N5AQ.
+      This type describes the transformed 'fw-update' Object
+      after applying the logstash filters.
+    type: group
+    fields:
+      - name: method
+        type: keyword
+      - name: start
+        type: date
+      - name: end
+        type: date
+      - name: success
+        type: boolean
+      - name: reboot
+        type: date
+      - name: reboot_reason
+        type: keyword
+      - name: install_return
+        type: short
+      - name: install_returned
+        type: date
+      - name: initiator
+        type: ip
+      - name: initiator_hostname
+        type: keyword
+      - name: initiator_network
+        type: keyword
+      - name: from_version
+        type: group
+        fields:
+          - name: buildnumber
+            type: integer
+          - name: major
+            type: short
+          - name: minor
+            type: short
+          - name: patch
+            type: short
+          - name: fw
+            type: keyword
+      - name: to_version
+        type: group
+        fields:
+          - name: buildnumber
+            type: integer
+          - name: major
+            type: short
+          - name: minor
+            type: short
+          - name: patch
+            type: short
+          - name: fw
+            type: keyword
