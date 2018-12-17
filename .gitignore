@@ -2,3 +2,4 @@ testing/logstash
 *.pyc
 .venv/
 .vscode/
+.~lock*

@@ -8,8 +8,51 @@
     after applying the logstash filters.
   type: group
   fields:
-    - name: name
+    - name: method
       type: keyword
-      description: >
-        The human-readable name of an AVM product.
-    ## TODO
+    - name: start
+      type: date
+    - name: end
+      type: date
+    - name: success
+      type: boolean
+    - name: reboot
+      type: date
+    - name: reboot_reason
+      type: keyword
+    - name: install_return
+      type: short
+    - name: install_returned
+      type: date
+    - name: initiator
+      type: ip
+    - name: initiator_hostname
+      type: keyword
+    - name: initiator_network
+      type: keyword
+    - name: from_version
+      type: group
+      fields:
+        - name: buildnumber
+          type: integer
+        - name: major
+          type: short
+        - name: minor
+          type: short
+        - name: patch
+          type: short
+        - name: fw
+          type: keyword
+    - name: to_version
+      type: group
+      fields:
+        - name: buildnumber
+          type: integer
+        - name: major
+          type: short
+        - name: minor
+          type: short
+        - name: patch
+          type: short
+        - name: fw
+          type: keyword
