@@ -10,7 +10,7 @@
     "product_name": "FRITZ!Box 7560",
     "provider_key": "htpdsl_vdsl"
   },
-  "fw-update": {
+  "avm_firmware_update_report": {
     "end": "1970-01-01T00:30:39Z",
     "from_version_lit": "xyz149.06.92,foo123",
     "initiator": "192.168.178.20",
