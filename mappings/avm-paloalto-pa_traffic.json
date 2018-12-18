@@ -17,10 +17,12 @@
           "client" : {
             "properties" : {
               "bytes" : {
-                    "type" : "long"
+                    "type" : "long",
+                    "index": false
               },
               "packets" : {
-                    "type" : "integer"
+                    "type" : "integer",
+                    "index": false
               }
             }
           },
@@ -49,7 +51,8 @@
                     "ignore_above" : 256
               },
               "duration" : {
-                    "type" : "integer"
+                    "type" : "integer",
+                    "index": false
               },
               "id" : {
                     "type" : "integer"
@@ -94,10 +97,12 @@
                     "ignore_above" : 256
               },
               "bytes" : {
-                    "type" : "long"
+                    "type" : "long",
+                    "index": false
               },
               "packets" : {
-                    "type" : "integer"
+                    "type" : "integer",
+                    "index": false
               },
               "protocol" : {
                     "type" : "keyword",
@@ -204,10 +209,12 @@
           "server" : {
             "properties" : {
               "bytes" : {
-                    "type" : "long"
+                    "type" : "long",
+                    "index": false
               },
               "packets" : {
-                    "type" : "integer"
+                    "type" : "integer",
+                    "index": false
               }
             }
           },
