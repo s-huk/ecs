@@ -1,0 +1,77 @@
+{
+  "@timestamp": "2018-12-17T13:05:55.000Z",
+  "@version": "1",
+  "client": {
+    "bytes": "884",
+    "packets": "7"
+  },
+  "destination": {
+    "ip": "212.42.244.122",
+    "port": "443",
+    "user": {
+      "name": null
+    }
+  },
+  "event": {
+    "category": "TRAFFIC",
+    "duration": "36",
+    "id": "57138",
+    "start": "2018/12/17 14:05:15"
+  },
+  "fields": {
+    "service_type": "pa_traffic"
+  },
+  "host": {
+    "ip": "172.16.1.4",
+    "name": "PA-3050-2"
+  },
+  "network": {
+    "application": "ssl",
+    "bytes": "4852",
+    "packets": "18",
+    "protocol": "tcp"
+  },
+  "paloalto": {
+    "action": "allow",
+    "destination": {
+      "location": "Germany",
+      "nat": {
+
+      },
+      "network": {
+        "interface": "ethernet1/3",
+        "name": "ADC"
+      }
+    },
+    "network": {
+      "category": "computer-and-internet-info"
+    },
+    "policy": "from-policy",
+    "rule": "ADC-IN  HTTP-geregelt",
+    "session": "tcp-rst-from-client",
+    "source": {
+      "location": "Germany",
+      "nat": {
+
+      },
+      "network": {
+        "interface": "ethernet1/1",
+        "name": "Internet"
+      }
+    }
+  },
+  "palotalto": {
+    "traffic": "end"
+  },
+  "server": {
+    "bytes": "3968",
+    "packets": "11"
+  },
+  "source": {
+    "ip": "95.114.47.124",
+    "port": "54052",
+    "user": {
+      "name": null
+    }
+  }
+}

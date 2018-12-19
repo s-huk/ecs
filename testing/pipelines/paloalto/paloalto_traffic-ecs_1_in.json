@@ -1,0 +1,17 @@
+{
+  "@timestamp": "2018-12-17T13:05:55.000Z",
+  "@version": "1",
+  "facility": 1,
+  "facility_label": "user-level",
+  "fields": {
+    "service_type": "pa_traffic"
+  },
+  "host": "172.16.1.4",
+  "logsource": "PA-3050-2",
+  "message": "1,2018/12/17 14:05:55,001701010707,TRAFFIC,end,2049,2018/12/17 14:05:55,95.114.47.124,212.42.244.122,0.0.0.0,0.0.0.0,ADC-IN  HTTP-geregelt,,,ssl,vsys1,Internet,ADC,ethernet1/1,ethernet1/3,Syslog VM,2018/12/17 14:05:55,57138,1,54052,443,0,0,0x1a,tcp,allow,4852,884,3968,18,2018/12/17 14:05:15,36,computer-and-internet-info,0,101892379563,0x0,Germany,Germany,0,11,7,tcp-rst-from-client,0,0,0,0,,PA-3050-2,from-policy,,,0,,0,,N/A,0,0,0,0\n",
+  "priority": 14,
+  "severity": 6,
+  "severity_label": "Informational",
+  "timestamp": "Dec 17 14:05:55"
+}
+
