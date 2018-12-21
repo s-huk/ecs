@@ -1,7 +1,8 @@
 # TODO: comparison of base fields e.g. with avm_must root
 # TODO: README.md: display orphans (separately)
 # TODO: deep merge of avm-fields OR prohibit types in extension.yml
-# TODO: improve details of error message in case of missing type field
+# OK: merge existing json template properties
+# OK: improve details of error message in case of missing type field
 import argparse
 import os
 import sys
@@ -24,68 +25,6 @@ argvars = vars( parser.parse_args() )
 #print("Called with arguments: %s" % argvars)
 #print(root_dir)
 #print(argvars["pipeline"])
-
-###################################################################################
-# TRASH - functions from ecs repo - TRASH
-###################################################################################
-
-def clean_namespace_fields(fields):
-    """Cleans up all fields to set defaults
-    """
-    for namespace in fields:
-
-        # For now set the default group to 2
-        if "group" not in namespace:
-            namespace["group"] = 2
-
-        prefix = ""
-        # Prefix if not base namespace
-        if namespace["name"] != "base":
-            prefix = namespace["name"]
-
-        if "fields" in namespace:
-            clean_fields(namespace["fields"], prefix, namespace["group"])
-
-
-def clean_fields(fields, prefix, group):
-    for field in fields:
-        clean_string_field(field, "description")
-        clean_string_field(field, "footnote")
-        clean_string_field(field, "example")
-        clean_string_field(field, "type")
-
-        # Add prefix if needed
-        if prefix != "":
-            field["name"] = prefix + "." + field["name"]
-
-        if 'level' not in field.keys():
-            field["level"] = '(use case)'
-
-        if 'group' not in field.keys():
-            # If no group set, set parent group
-            field["group"] = group
-
-        if "multi_fields" in field:
-            for f in field["multi_fields"]:
-                clean_string_field(f, "description")
-                clean_string_field(f, "example")
-                clean_string_field(f, "type")
-
-                # multi fields always have a prefix
-                f["name"] = field["name"] + "." + f["name"]
-
-                if 'group' not in f.keys():
-                    # If no group set, set parent group
-                    f["group"] = group
-
-def clean_string_field(field, key):
-    """Cleans a string field and creates an empty string for the field in case it does not exist
-    """
-    if key in field.keys():
-        # Remove all spaces and newlines from beginning and end
-        field[key] = str(field[key]).strip()
-    else:
-        field[key] = ""
 
 
 ###################################################################################
@@ -134,6 +73,7 @@ def deep_update(d, inset, conflict_action):
                     if d[k] != inset[k] and conflict_action:
                         if conflict_action == "override":
                             d[k] = inset[k]
+                            print ( "# WARNING: value overridden: '"+str_path+"."+k+"':  "+str(inset[k])+" => "+str(d[k]) )
                         elif conflict_action == "error":
                             raise Exception( "error: found conflict: unable to override '"+str_path+"."+k+"':  "+str(inset[k])+" => "+str(d[k]) )
 
@@ -296,30 +236,35 @@ def expand_ecs_fields_to_mapping(f):
     return result
 
 
+def strip_json_values(f):
+    if isinstance(f, dict):
+        for key in f.keys():
+            if isinstance(f[key], str):
+                f[key] = f[key].strip()
+            else: 
+                strip_json_values(f[key])
+    elif isinstance(f, list):
+        for g in f:
+            strip_json_values(g)
+
 def prune_ecs_fields(f, assert_type_field_exists):
-    def assert_key_existence(key):
-        if key in f.keys():
-            f[key] = str(f[key]).strip() # Remove leading/trailing spaces and newlines 
-        else:
-            raise Exception("key " + key + " does not exist")
-    
     if argvars["action"] == "doc":
-        #list_keys_to_remove=["footnote","required"]
-        list_keys_to_remove=[]
+        list_keys_to_remove=[] # ["footnote","required"]
     if argvars["action"] == "show":    
         list_keys_to_remove=["title","description","footnote","example","level","group","required"]
     
     if isinstance(f, dict):
         for kpr in list_keys_to_remove:
             f.pop(kpr, None)
-        assert_key_existence("name")
+        if not "name" in f.keys():
+            raise Exception("key 'name' does not exist in field: " + str(f))
         if "multi_fields" in f:
             prune_ecs_fields(f["multi_fields"], assert_type_field_exists)
         if "fields" in f and isinstance(f["fields"], list):
             f.pop("type", None)
             prune_ecs_fields(f["fields"], assert_type_field_exists)
-        elif assert_type_field_exists:
-            assert_key_existence("type")
+        elif assert_type_field_exists and not "type" in f.keys():
+            raise Exception("key 'type' does not exist in field: " + str(f))
     elif isinstance(f, list):
         for g in f:
             prune_ecs_fields(g, assert_type_field_exists)
@@ -337,6 +282,7 @@ for path in sorted(glob.glob(root_dir+"doc/avm-schemas/*.yml")):
             raise Exception("ERROR: missing keyword 'field:' in yaml file: " + path)
 
 #print (  fields )
+strip_json_values(fields)
 prune_ecs_fields(fields, assert_type_field_exists=True)
 m_expanded = expand_ecs_fields_to_mapping(fields)
 #print (  m_expanded  )
@@ -347,6 +293,7 @@ with open(  root_dir+"/doc/ecs-extension.yml", 'r') as f_extension:
 
 #print( extension )
 
+strip_json_values(extension)
 prune_ecs_fields(extension["fields"], assert_type_field_exists=False)
 m_extension = conv_fields_to_dict(extension)    
 #print( m_extension )
@@ -452,9 +399,11 @@ if argvars["action"] == "show":
             with open(root_dir+"standard-template.json", 'r') as f_template:
                 template = json.loads( withdraw_comments(f_template) )
                 template.update({"index_patterns": [ os.path.basename(root_dir+p+".conf")[:-5]+"*" ]}),
-        deep_update(template, result, conflict_action="error")
+        #deep_update(template, result, conflict_action="error")
+        deep_update(result, template, conflict_action="override")
         
-        print( json.dumps(template, indent=4, sort_keys=True) )
+        #print( json.dumps(template, indent=4, sort_keys=True) )
+        print( json.dumps(result, indent=4, sort_keys=True) )
         print ()
         
 
