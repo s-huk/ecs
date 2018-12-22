@@ -10,29 +10,47 @@ ignore_malformed: true
 fields:
 
 ########################################
-# additional fields (with type):
+# additional avm fields (with type):
 ########################################
-  - name: "@version"
-    description: >
-      Beat version
-    type: integer
-
+  - name: base
+    fields:
+      - name: "@version"
+        type: integer
+        description: >
+          Beat version
+      - name: offset
+        type: integer
+        title: offset
+        description: >
+          Kafka Offset
 ########################################
 # ecs mapping extensions (without type):
 ########################################
+  - name: base
+    fields:
+      - name: "@timestamp"
+        testflag: foobar
   - name: message
     fielddata: true
+  - name: event
+    fields:
+      - name: category
+        testflag: foo
+        type: int
+        fields:
+          - name: subtest
+            type: text
   - name: agent
     fields:
-    - name: version
-      coerce: true
-    - name: name
-      fielddata: true
-      ignore_above: 123
+      - name: version
+        coerce: true
+      - name: name
+        fielddata: true
+        ignore_above: 123
   - name: http
     fields:
-    - name: response
-      fielddata: false
-      fields:
-      - name: status_code
-        coerce: true
+      - name: response
+        fielddata: false
+        fields:
+          - name: status_code
+            coerce: true

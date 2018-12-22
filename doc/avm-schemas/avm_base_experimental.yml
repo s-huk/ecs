@@ -1,9 +1,9 @@
 ---
 fields:
-  - name: "@version"
-    type: integer
-    description: >
-      Beat version
+#  - name: "@version"
+#    type: integer
+#    description: >
+#      Beat version
   - name: offset
     type: integer
     title: offset

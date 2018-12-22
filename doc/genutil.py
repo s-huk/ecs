@@ -1,6 +1,6 @@
-# TODO: comparison of base fields e.g. with avm_must root
-# TODO: README.md: display orphans (separately)
-# TODO: deep merge of avm-fields OR prohibit types in extension.yml
+# OK: comparison of base fields e.g. with avm_must root
+# OK: README.md: display orphans (separately)
+# OK: deep merge of avm-fields OR prohibit types in extension.yml
 # OK: merge existing json template properties
 # OK: improve details of error message in case of missing type field
 import argparse
@@ -128,50 +128,70 @@ class Mapping:
             result.update( { k2:v2 for (k,v) in m["fields"].items() for (k2,v2) in self._get_mapping_nav(v, prefix+[k]).items() } )
         return result
 
+    def path_exists(self, path):
+        def path_exists(path, mapping):
+            if path != []:
+                for fieldkey in ["properties", "fields"]:
+                    if fieldkey in mapping and path[0] in mapping[fieldkey]:
+                        return path_exists(path[1:], mapping[fieldkey][path[0]])
+                return False
+            return True
+        return path_exists(path, self.mapping)
+
+    def amend_path(self, path, error_non_existing):
+        if isinstance(path, str):
+            if path in self.nav:
+                path = self.nav[path]
+            else:
+                path = path.split(".")
+        if isinstance(path, list):
+            if self.path_exists(path) == True:
+                return path
+            if self.path_exists(['base']+path) == True:
+                return ['base']+path
+            if error_non_existing:
+                raise Exception("Path not found: " + str(path))
+        
     # gathers all settings of a given path - on every depth of the path
     def accumulate(self, path):
-        def accumulate(mapping, path):
-            result = {}
-            result.update( {k:v for (k,v) in mapping.items() if k!="properties" and k!="fields" } )
+        def ping(mapping, path):
+            result = {k:v for (k,v) in mapping.items() if k!="properties" and k!="fields" }
             
             if path != []:
-                if "properties" in mapping and path[0] in mapping["properties"]:
-                    result.update( {"properties": {path[0]: accumulate(mapping["properties"][path[0]], path[1:])} } )
-
-                if "fields" in mapping and path[0] in mapping["fields"]:
-                    result.update( {"fields": accumulate(mapping["properties"][path[0]], path[1:]) } )
-
+                for fieldkey in ["properties", "fields"]:
+                    if fieldkey in mapping and path[0] in mapping[fieldkey]:
+                        result.update( {fieldkey: pong(mapping[fieldkey], path)} )
+                        return result
+                return pong(mapping, path)
+            
             return result
         
-        #if isinstance(path, str) and path in self.nav:
-        #    return accumulate(self.mapping, self.nav[path])
-        #if isinstance(path, list):
-        #    return accumulate(self.mapping, path)
-        #return {}
-        return accumulate(self.mapping, path)
+        def pong(mapping, path):
+            if path[0] in mapping:
+                return {path[0]: ping(mapping[path[0]], path[1:])}
+#            elif path[0] in mapping.get('base', {"properties": None})["properties"]:
+#                return {path[0]: ping(mapping["base"]["properties"][path[0]], path[1:])}
+            raise Exception("Path not found: " + str(path) + "   " + str(mapping["properties"].keys()))
+        
+        return ping(self.mapping, self.amend_path(path, error_non_existing=True))
 
+    
     # navigates to a specific path and returns the resulting dict
     def navigate(self, path):
-        def navigate(mapping, path):
-            result = {}
-            if path == []:
-                result.update( {k:v for (k,v) in mapping.items() if k!="properties" and k!="fields" } )
-            
+        def ping(mapping, path):
             if path != []:
-                if "properties" in mapping and path[0] in mapping["properties"]:
-                    return navigate(mapping["properties"][path[0]], path[1:])
-
-                if "fields" in mapping and path[0] in mapping["fields"]:
-                    return navigate(mapping["fields"][path[0]], path[1:])
-
-            return result
+                for fieldkey in ["properties", "fields"]:
+                    if fieldkey in mapping:
+                        return pong(mapping[fieldkey], path)
+                return pong(mapping, path)
+            return mapping.copy()
+        def pong(mapping, path):
+            if path[0] in mapping:
+                return ping(mapping[path[0]], path[1:])
+            raise Exception("Path not found: " + str(path))
         
-        if isinstance(path, str) and path in self.nav:
-            return navigate(self.mapping, self.nav[path])
-        if isinstance(path, list):
-            return navigate(self.mapping, path)
-        return {}
-        #return navigate(self.mapping, path)
+        return ping(self.mapping, self.amend_path(path, error_non_existing=True))
+
 
     # partitions all path strings by first field
     def get_all_keys_partitioned_by_namespace(self):
@@ -186,11 +206,20 @@ class Mapping:
         paths.sort()
         result = {}
         for i in paths:
-            if i in self.nav:
-                print ("# found: " + i + "   " + str(self.nav[i]))
-                deep_update(result, self.accumulate(self.nav[i]), conflict_action=None)
+            p = self.amend_path(i, error_non_existing=False)
+            if p:
+                print ("# found: " + i + "   " + str(p))                
+                deep_update(result, self.accumulate(p), conflict_action=None)
+                #deep_update(result, self.accumulate(p), conflict_action="error")
             else:
                 print ("# WARNING: ignoring orphaned field which was not found in the avm/ecs schema: " + i)
+
+        # relocate 'base' to root
+        if "properties" in result: 
+            if "base" in result["properties"]:
+                base = result["properties"].pop("base")
+                deep_update(result, base, "error")
+            
         return result
 
     def collate_template(self, paths):
@@ -228,11 +257,6 @@ def expand_ecs_fields_to_mapping(f):
     result = [{k:v for (k,v) in d.items() if not k=="reusable"} for d in root if not "reusable" in d or ("top_level" in d["reusable"] and d["reusable"]["top_level"]==True)]
     result = conv_fields_to_dict(result)
 
-    if argvars["action"] == "show":
-        base = result["base"]
-        result.pop("base", None)
-        result.update(base["properties"])
-    
     return result
 
 
@@ -335,20 +359,28 @@ if argvars["action"] == "doc":
     #orphaned = [{"name":f, "type":"", "description":""} for f in avmmust_flat if f not in mapping.nav ]
     #print (orphaned)
 
-    avm_pipelines.sort()
     beats = {}
     for beat in [os.path.basename(os.path.dirname(f)) for f in avm_pipelines]:
         beats[beat] = beats.get(beat, 0) + 1
 
     output = '<table><tbody>'
     ns_key_map = mapping.get_all_keys_partitioned_by_namespace() # fieldpaths partitioned by namespace
-    for ns in sorted( list(ns_key_map.keys()) ):
+    nslist = sorted(  list(ns_key_map.keys())  )
+    nslist.remove("base")
+    nslist.remove("avm")
+    #for ns in sorted( list(ns_key_map.keys()) ):
+    for ns in ["base"] + nslist + ["avm"]:
         output += '<tr><th rowspan=2><span title="'+mapping.navigate(ns).get("description", "")+'"><h4>'+str(ns)+'</h4></span></th>'+''.join(['<td colspan='+str(beats[b])+' align="center">'+str(b)+'</td>' for b in sorted(beats.keys())])+'</tr>'
         output += '<tr>'+''.join(['<td align="center"><span title="'+p+'">'+os.path.basename(p)[:2]+'</span></td>' for p in avm_pipelines])+'</tr>'
 
         #for field in sorted(namespace["fields"], key=lambda field: field["name"]):
         for path in sorted(ns_key_map[ns]):
             field = mapping.navigate(path)
+            
+            if path.startswith("base."):
+                path = path[5:]
+            
+
             #def get_markdown_row(path, field):
             #path = ".".join(path)
             # Replace newlines with HTML representation as otherwise newlines don't work in Markdown
@@ -361,6 +393,16 @@ if argvars["action"] == "doc":
 
             str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
             output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
+    
+    # ORPHANED FIELDS
+    output += '<tr><th rowspan=2><span title=""><h4>orphaned</h4></span></th>'+''.join(['<td colspan='+str(beats[b])+' align="center">'+str(b)+'</td>' for b in sorted(beats.keys())])+'</tr>'
+    output += '<tr>'+''.join(['<td align="center"><span title="'+p+'">'+os.path.basename(p)[:2]+'</span></td>' for p in avm_pipelines])+'</tr>'
+    
+    for path in sorted([i for f in avm_pipelines for i in avm_must[f] if not mapping.amend_path(i, error_non_existing=False)]):
+        show_name = '<span title="()">'+path+'</span>'
+        str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
+        output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
+    
     output += "</tbody></table>"
     with open(root_dir+"README.md", "w") as readme:
         with open(root_dir+"INTRO.md", "r") as intro:
