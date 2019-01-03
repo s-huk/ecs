@@ -3,6 +3,9 @@
 # OK: deep merge of avm-fields OR prohibit types in extension.yml
 # OK: merge existing json template properties
 # OK: improve details of error message in case of missing type field
+# TODO: re-think acceptance of type-less fields
+# OK: console output doc of pipeline singletons
+# OK: check if template props override yml props
 import argparse
 import os
 import sys
@@ -16,7 +19,7 @@ root_dir = os.path.abspath(sys.path[0]+'/../') +"/"
 #print("\nroot directory: "+root_dir+"\n")
 # arg parsing
 parser = argparse.ArgumentParser(description='Run tooling related to elastic templaes .')
-parser.add_argument('-a', '--action', type=str, required=True, dest='action', help="Action to run. 'show' will print the final template to stdout.", choices=[ "show", "doc" ], default="show")
+parser.add_argument('-a', '--action', type=str, required=True, dest='action', help="Action to run. 'show' will print the final template to stdout.", choices=[ "show", "doc", "stat" ], default="show")
 parser.add_argument('-p', '--pipelines', type=str, required=True, dest='pipelines', help="Path to pipeline confs to run against. Should be relative to the projects root folder.")
 #parser.add_argument('-p', '--pipelines', type=str, nargs='+', required=True, dest='pipelines', help="Paths to pipeline confs to run against. Should be relative to the projects root folder.")
 
@@ -24,8 +27,8 @@ argvars = vars( parser.parse_args() )
 
 #print("Called with arguments: %s" % argvars)
 #print(root_dir)
-#print(argvars["pipeline"])
-
+#print( str(argvars) )
+#exit()
 
 ###################################################################################
 # utils
@@ -272,11 +275,12 @@ def strip_json_values(f):
             strip_json_values(g)
 
 def prune_ecs_fields(f, assert_type_field_exists):
-    if argvars["action"] == "doc":
-        list_keys_to_remove=[] # ["footnote","required"]
+    list_keys_to_remove=[]
     if argvars["action"] == "show":    
         list_keys_to_remove=["title","description","footnote","example","level","group","required"]
-    
+    #elif: # doc, stat, etc.
+    #    list_keys_to_remove=[] # ["footnote","required"]
+
     if isinstance(f, dict):
         for kpr in list_keys_to_remove:
             f.pop(kpr, None)
@@ -333,6 +337,7 @@ mapping = Mapping(m_extension)
 #mapping.print()
 #print()
 #print()
+#print( json.dumps(mapping.mapping, indent=3, sort_keys=True) )
 #exit()
 
 
@@ -412,6 +417,55 @@ if argvars["action"] == "doc":
     print( "Die README-Datei wurde aktualisiert.\n" )
 
 
+###################################################################################
+# doc console singleton
+###################################################################################
+# TODO
+
+if argvars["action"] == "stat":
+    avm_pipelines = [ m[len(root_dir):-5] for p in argvars["pipelines"].split(",") for m in glob.glob(root_dir+p) if os.path.isfile(m) and m[-5:]==".conf" ]
+    if len(avm_pipelines) != 1:
+        raise Exception("ERROR: stat: pipeline singleton expected. Found "+str(avm_pipelines))
+    
+    avm_pipeline = avm_pipelines[0]
+    
+    avm_must = {}
+    for json_path in sorted( glob.glob(root_dir+'testing/'+avm_pipeline+"_*_must.json") ):
+        with open(  json_path, 'r') as must_file:
+            avm_must.update( flatten_json(  json.loads( withdraw_comments(must_file) )  ) )
+    
+    beats = {os.path.basename(os.path.dirname(avm_pipeline)): 1}
+
+    output = os.path.basename(avm_pipeline)+'\n'
+    ns_key_map = mapping.get_all_keys_partitioned_by_namespace() # fieldpaths partitioned by namespace
+    nslist = sorted(  list(ns_key_map.keys())  )
+    nslist.remove("base")
+    nslist.remove("avm")
+    #for ns in sorted( list(ns_key_map.keys()) ):
+    for ns in ["base"] + nslist + ["avm"]:
+        output += '    '+str(ns)+'\n'
+
+        for path in sorted(ns_key_map[ns]):
+            field = mapping.navigate(path)
+            
+            if path.startswith("base."):
+                path = path[5:]
+            
+            # str(field.get("example",""))
+            # str(field.get("description", ""))
+            show_name = path +' ['+field["type"]+']'
+            output += '        '+show_name+': '+str(avm_must[path]) +'\n' if path in avm_must else ""
+            
+    
+    # ORPHANED FIELDS
+    output += '    orphaned'+'\n'
+    
+    for path in sorted([i for i in avm_must if not mapping.amend_path(i, error_non_existing=False)]):
+        show_name = path +' [?]'
+        output += '        '+show_name+': '+str(avm_must[path]) +'\n' if path in avm_must else ""
+            
+    print( output+"\n\n" )
+    
 ###################################################################################
 # mapping generation
 ###################################################################################
