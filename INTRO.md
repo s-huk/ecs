@@ -51,24 +51,31 @@ Einmalig müssen mittels `make setup` Abhängigkeiten für den [Kafka Consumer](
 - **Tests starten:** `./run-testbundle.sh` <br>
 (testet jede Conf in pipelines/\*/\*.conf gegen passenden JSON-Input in testing/pipelines/\*/\*.json)
 - **Zu testende Confs explizit angeben:** `./run-testbundle.sh pipelines/*/ha*.conf` (siehe Hilfe)
-- **Samples aus Kafka lesen:** `./run-kafka-consumer.sh` ließt aus Kafka ein, z.B. `./run-kafka-consumer.sh --topic ops_filebeat`. Genaue Verwendung siehe `./run-kafka-consumer.sh -h`.
+- **Samples aus Kafka lesen:** `./run-kafka-consumer.sh` liest aus Kafka ein, z.B. `./run-kafka-consumer.sh --topic ops_filebeat`. Genaue Verwendung siehe `./run-kafka-consumer.sh -h`.
 
-Jede selektierte Konfiguration (d.h. Conf-File) wird mit jedem namensgleichen JSON-Input-File in testing/pipelines getestet. Konfigurationen ohne passendes JSON-Input-File werden nicht getestet. Optional kann zu jedem JSON-Input-File ein JSON-Must-File (erwarteter Logstash-Output) hinterlegt werden (siehe Beispiele in testing/pipelines).
+Jede selektierte Konfiguration (d.h. Conf-File) wird mit jedem namensgleichen JSON-Input-File in testing/pipelines getestet. Konfigurationen ohne passendes JSON-Input-File werden nicht getestet. Es ist vorgesehen, zu jedem JSON-Input-File ein JSON-Must-File (erwarteter Logstash-Output) zu hinterlegen (siehe Beispiele in testing/pipelines).
 
 Benennungsmuster der JSON-Dateien:
 
-- JSON-Input: <conf_filename_ohne_extension>_{optionaler_test_identifier}in.json
-- JSON-Erwartung: <conf_filename_ohne_extension>_{optionaler_test_identifier}must.json
+- JSON-Input: <conf_filename_ohne_extension>_{optionaler_test_identifier}_in.json
+- JSON-Erwartung: <conf_filename_ohne_extension>_{optionaler_test_identifier}_must.json
 
 Conf- und JSON-Files werden als zueinander passend betrachtet und getestet, wenn der Base-Filename (d.h. conf_filename_ohne_extension) und auch der relative Pfad zum jeweiligen pipelines-Ordner gleich sind.
 
 #### Dokumentation aktualisieren (experimental)
 
-Nach dem Verändern von Pipelines sollte stets die Dokumentation (diese README.md) generiert und ins mit ins git eingecheckt werden werden. Die Dokumentation kann mittels `./run-doc-generation.sh`
+Nach dem Verändern von Pipelines sollte stets die Dokumentation (diese README.md) generiert und ins mit ins git eingecheckt werden werden. Die Generierung der README-Dokumentation geschieht mittels `./run-doc-generation.sh`
 
 #### Mapping generieren (experimental)
 
 Beispiel: `./run-template-tools.sh pipelines/reporting-backend-service/*.conf`
+
+Jedes Feld innerhalb aller zur Pipeline gehörigen Must-Dateien (JSON-Erwartungen) wird gemäß zugrunde liegender Schema-Definition automatisch in das Mapping übernommen, sofern auch eine Schema-Definition für dieses Feld vorliegt (d.h. sofern das Feld nicht verwaist ist). Alle benötigten Felder müssen also entweder Schema-treu benannt und durch Testfälle (MUST-Dateien) abgedeckt sein - oder alternativ manuell in das ensprechenden Mapping-Template (also die JSON-Datei neben dem Conf-File) eingetragen werden.
+
+##### Konsolen-Vorschau der Zuordnung aller erwarteten Felder (d.h. Felder aus MUST-Files) in die gegebene Schema-Definition:
+
+`./run-stat.sh pipelines/reporting-backend-service/fw-reports.conf`
+
 
 #### Curator Konfiguration
 
