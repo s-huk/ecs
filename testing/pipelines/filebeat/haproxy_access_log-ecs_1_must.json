@@ -1,9 +1,6 @@
 {
   "@timestamp": "2018-11-16T00:40:57.455Z",
   "@version": "1",
-  "actconn": "149",
-  "backend_name": "dns",
-  "backend_queue": "0",
   "beat": {
     "hostname": "argo-lb-02",
     "name": "argo-lb-02",
@@ -16,9 +13,8 @@
   "file": {
     "path": "/avm/logs/haproxy/haproxy.log"
   },
-  "frontend_name": "dns",
   "host": {
-    "name": "argo-lb-02" # ehem. syslog_server und beat.hostname
+    "name": "argo-app-01" # ehem. syslog_server und beat.hostname
   },
   "http": {
     "version": "1.1", # ehem. http_version
@@ -30,9 +26,6 @@
   "input": {
     "type": "log"
   },
-  "kafka": {
-    "offset": 5134327072
-  },
   "process": {
     "pid": "1701",
     "name": "haproxy"
@@ -40,18 +33,29 @@
   "prospector": {
     "type": "log"
   },
+  "service": {
+    "name": "dns"
+  },
   "source": {
+    "bytes": "226", # ehem. read_bytes
     "ip": "78.55.162.196",
-    "port": "34378",
-    "domain": "argo-app-01",
-    "bytes": "226" # ehem. read_bytes
+    "port": "34378"
   },
   "event": {
     "duration": "8" # ehem. time_duration
   },
   "url": {
     "path": "/update.php?ipv4=78.55.162.196&ipv6="
+  },
+  "avm": {
+    "kafka": {
+      "offset": 5134327072
+    }
   }
+#  "frontend_name": "dns",
+#  "backend_name": "dns",
+#  "backend_queue": "0",
+#  "actconn": "149",
 #  "beconn": "2",
 #  "captured_request_cookie": "-",
 #  "captured_response_cookie": "-",
