@@ -403,7 +403,7 @@ if argvars["action"] == "doc":
     output += '<tr><th rowspan=2><span title=""><h4>orphaned</h4></span></th>'+''.join(['<td colspan='+str(beats[b])+' align="center">'+str(b)+'</td>' for b in sorted(beats.keys())])+'</tr>'
     output += '<tr>'+''.join(['<td align="center"><span title="'+p+'">'+os.path.basename(p)[:2]+'</span></td>' for p in avm_pipelines])+'</tr>'
     
-    for path in sorted([i for f in avm_pipelines for i in avm_must[f] if not mapping.amend_path(i, error_non_existing=False)]):
+    for path in sorted(list(set([i for f in avm_pipelines for i in avm_must[f] if not mapping.amend_path(i, error_non_existing=False)]))):
         show_name = '<span title="()">'+path+'</span>'
         str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
         output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
@@ -459,8 +459,7 @@ if argvars["action"] == "stat":
     
     # ORPHANED FIELDS
     output += '    orphaned'+'\n'
-    
-    for path in sorted([i for i in avm_must if not mapping.amend_path(i, error_non_existing=False)]):
+    for path in sorted(list(set([i for i in avm_must if not mapping.amend_path(i, error_non_existing=False)]))):
         show_name = path +' [?]'
         output += '        '+show_name+': '+str(avm_must[path]) +'\n' if path in avm_must else ""
             
