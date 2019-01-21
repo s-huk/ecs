@@ -1,3 +1,3 @@
 #!/bin/bash
 
-. .venv/bin/activate && python doc/genutil.py -a doc -p "pipelines/*/*.conf"
+. .venv/bin/activate && python doc/genutil.py -a gen-doc -p "pipelines/*/*.conf"

@@ -19,11 +19,24 @@ root_dir = os.path.abspath(sys.path[0]+'/../') +"/"
 #print("\nroot directory: "+root_dir+"\n")
 # arg parsing
 parser = argparse.ArgumentParser(description='Run tooling related to elastic templaes .')
-parser.add_argument('-a', '--action', type=str, required=True, dest='action', help="Action to run. 'show' will print the final template to stdout.", choices=[ "show", "doc", "stat" ], default="show")
-parser.add_argument('-p', '--pipelines', type=str, required=True, dest='pipelines', help="Path to pipeline confs to run against. Should be relative to the projects root folder.")
+parser.add_argument('-a', '--action', type=str, required=False, dest='action', help="Action to run. 'show' will print the final template to stdout.", choices=[ "show", "gen-doc", "submit-template" ], default="show")
+parser.add_argument('-p', '--pipelines', type=str, required=False, dest='pipelines', help="Path to pipeline confs to run against. Should be relative to the projects root folder.", default="pipelines/*/*.conf")
+parser.add_argument('-c', '--cluster', type=str, required=False, dest='cluster', help="Target cluster to set the template on. 'http://t-crash-elklb-1/:9200' will issue the template on the cluster.", default="http://t-crash-elklb-1/:9200")
 #parser.add_argument('-p', '--pipelines', type=str, nargs='+', required=True, dest='pipelines', help="Paths to pipeline confs to run against. Should be relative to the projects root folder.")
 
 argvars = vars( parser.parse_args() )
+print()
+
+
+# stdout selected pipelines
+if argvars["action"] == "gen-doc" and argvars["pipelines"] != "pipelines/*/*.conf":
+    print("ignoring argument -p " + argvars["pipelines"])
+    argvars["pipelines"] = "pipelines/*/*.conf"
+    
+avm_pipelines = [ m[len(root_dir):-5] for p in argvars["pipelines"].split(",") for m in glob.glob(root_dir+p) if os.path.isfile(m) and m[-5:]==".conf" ]
+avm_pipelines.sort()
+print (" => "+"\n => ".join(avm_pipelines))
+
 
 #print("Called with arguments: %s" % argvars)
 #print(root_dir)
@@ -211,11 +224,11 @@ class Mapping:
         for i in paths:
             p = self.amend_path(i, error_non_existing=False)
             if p:
-                print ("# found: " + i + "   " + str(p))                
                 deep_update(result, self.accumulate(p), conflict_action=None)
-                #deep_update(result, self.accumulate(p), conflict_action="error")
-            else:
-                print ("# WARNING: ignoring orphaned field which was not found in the avm/ecs schema: " + i)
+#                print ("# found: " + i + "   " + str(p))                
+#                #deep_update(result, self.accumulate(p), conflict_action="error")
+#            else:
+#                print ("# WARNING: ignoring orphaned field which was not found in the avm/ecs schema: " + i)
 
         # relocate 'base' to root
         if "properties" in result: 
@@ -276,7 +289,7 @@ def strip_json_values(f):
 
 def prune_ecs_fields(f, assert_type_field_exists):
     list_keys_to_remove=[]
-    if argvars["action"] == "show":    
+    if argvars["action"] != "gen-doc":
         list_keys_to_remove=["title","description","footnote","example","level","group","required"]
     #elif: # doc, stat, etc.
     #    list_keys_to_remove=[] # ["footnote","required"]
@@ -345,12 +358,9 @@ mapping = Mapping(m_extension)
 # doc generation
 ###################################################################################
 
-if argvars["action"] == "doc":
+if argvars["action"] == "gen-doc":
     def tr_bad_chars(s):
         return str(s).replace('"','').replace('[','').replace(']','').replace("\n", "   ")
-    
-    avm_pipelines = [ m[len(root_dir):-5] for m in glob.glob(root_dir+"pipelines/*/*.conf") if os.path.isfile(m) and m[-5:]==".conf" ]
-    avm_pipelines.sort()
     
     avm_must = {}
     for p in avm_pipelines:
@@ -414,65 +424,22 @@ if argvars["action"] == "doc":
             readme.write(intro.read() + "\n\n## Felder\n")
         readme.write(output + "\n\n")
     
-    print( "Die README-Datei wurde aktualisiert.\n" )
+    print( "\nDie README-Datei wurde aktualisiert.\n" )
 
 
-###################################################################################
-# doc console singleton
-###################################################################################
-# TODO
-
-if argvars["action"] == "stat":
-    avm_pipelines = [ m[len(root_dir):-5] for p in argvars["pipelines"].split(",") for m in glob.glob(root_dir+p) if os.path.isfile(m) and m[-5:]==".conf" ]
-    if len(avm_pipelines) != 1:
-        raise Exception("ERROR: stat: pipeline singleton expected. Found "+str(avm_pipelines))
-    
-    avm_pipeline = avm_pipelines[0]
-    
-    avm_must = {}
-    for json_path in sorted( glob.glob(root_dir+'testing/'+avm_pipeline+"_*_must.json") ):
-        with open(  json_path, 'r') as must_file:
-            avm_must.update( flatten_json(  json.loads( withdraw_comments(must_file) )  ) )
-    
-    beats = {os.path.basename(os.path.dirname(avm_pipeline)): 1}
-
-    output = os.path.basename(avm_pipeline)+'\n'
-    ns_key_map = mapping.get_all_keys_partitioned_by_namespace() # fieldpaths partitioned by namespace
-    nslist = sorted(  list(ns_key_map.keys())  )
-    nslist.remove("base")
-    nslist.remove("avm")
-    #for ns in sorted( list(ns_key_map.keys()) ):
-    for ns in ["base"] + nslist + ["avm"]:
-        output += '    '+str(ns)+'\n'
-
-        for path in sorted(ns_key_map[ns]):
-            field = mapping.navigate(path)
-            
-            if path.startswith("base."):
-                path = path[5:]
-            
-            # str(field.get("example",""))
-            # str(field.get("description", ""))
-            show_name = path +' ['+field["type"]+']'
-            output += '        '+show_name+': '+str(avm_must[path]) +'\n' if path in avm_must else ""
-            
-    
-    # ORPHANED FIELDS
-    output += '    orphaned'+'\n'
-    for path in sorted(list(set([i for i in avm_must if not mapping.amend_path(i, error_non_existing=False)]))):
-        show_name = path +' [?]'
-        output += '        '+show_name+': '+str(avm_must[path]) +'\n' if path in avm_must else ""
-            
-    print( output+"\n\n" )
-    
 ###################################################################################
 # mapping generation
 ###################################################################################
 
-if argvars["action"] == "show":
-    avm_pipelines = [ m[len(root_dir):-5] for p in argvars["pipelines"].split(",") for m in glob.glob(root_dir+p) if os.path.isfile(m) and m[-5:]==".conf" ]
-    avm_pipelines.sort()
-
+if argvars["action"] == "show" or argvars["action"] == "submit-template":
+   
+    if argvars["action"] == "submit-template":
+        yes_no = input("\nSollen die oben stehenden Templates wirklich an des Server " + argvars["cluster"] + " geschickt werden? [y/N] ")
+        if yes_no == '' or yes_no[0].lower().strip() != 'y':
+            print("\nAktion wurde nicht durchgeführt.\n")
+            exit()
+        
+    
     avm_must = {}
     for p in avm_pipelines:
         avm_must[p] = {}
@@ -481,8 +448,50 @@ if argvars["action"] == "show":
                 avm_must[p].update( flatten_json(  json.loads( withdraw_comments(must_file) )  ) )
         
         print ()
+        print ("#############################################################")
         print ("# Pipeline: "+p+".conf")
+        print ("#############################################################")
+#        if argvars["action"] == "show": # console doc summary
+        
+        #
+        # print schema
+        #
         print ("#")
+        beats = {os.path.basename(os.path.dirname(p)): 1}
+
+        #output = os.path.basename(p)+'\n'
+        output = ""
+        ns_key_map = mapping.get_all_keys_partitioned_by_namespace() # fieldpaths partitioned by namespace
+        nslist = sorted(  list(ns_key_map.keys())  )
+        nslist.remove("base")
+        nslist.remove("avm")
+        #for ns in sorted( list(ns_key_map.keys()) ):
+        for ns in ["base"] + nslist + ["avm"]:
+            output += '#    '+str(ns)+'\n'
+
+            for path in sorted(ns_key_map[ns]):
+                field = mapping.navigate(path)
+                
+                if path.startswith("base."):
+                    path = path[5:]
+                
+                # str(field.get("example",""))
+                # str(field.get("description", ""))
+                show_name = path +' ['+field["type"]+']'
+                output += '#        '+show_name+': '+str(avm_must[p][path]) +'\n' if path in avm_must[p] else ""
+                
+        
+        # ORPHANED FIELDS
+        output += '#    orphaned'+'\n'
+        for path in sorted(list(set([i for i in avm_must[p] if not mapping.amend_path(i, error_non_existing=False)]))):
+            show_name = path +' [?]'
+            output += '#        '+show_name+': '+str(avm_must[p][path]) +'\n' if path in avm_must[p] else ""
+                
+        print( output+"\n" )
+        #
+        # end: print schema
+        #
+
         avmmust_flat = list(set([a for a in avm_must[p]]))
         #result = mapping.collate_mapping(avmmust_flat)
         result = mapping.collate_template(avmmust_flat)
@@ -498,10 +507,16 @@ if argvars["action"] == "show":
         deep_update(result, template, conflict_action="override")
         
         #print( json.dumps(template, indent=4, sort_keys=True) )
+#        if argvars["action"] == "show":
         print( json.dumps(result, indent=4, sort_keys=True) )
         print ()
         
-
+        if argvars["action"] == "submit-template":
+            print("#    RESULT SUBMITTED")
+    
+    if argvars["action"] == "submit-template":
+        print("\nAktion wurde durchgeführt.\n")
+        
     #avmmust_flat = list(set([p for k in list(avm_must.keys()) for p in avm_must[k] ])) 
 
 
