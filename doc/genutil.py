@@ -13,6 +13,10 @@ import yaml
 import glob 
 import json
 import re
+import getpass
+#from elasticsearch import Elasticsearch
+#import certifi
+import requests
 
 # root_dir is the directory of the git repo elop-logstash-pipelines
 root_dir = os.path.abspath(sys.path[0]+'/../') +"/"
@@ -21,10 +25,15 @@ root_dir = os.path.abspath(sys.path[0]+'/../') +"/"
 parser = argparse.ArgumentParser(description='Run tooling related to elastic templaes .')
 parser.add_argument('-a', '--action', type=str, required=False, dest='action', help="Action to run. 'show' will print the final template to stdout.", choices=[ "show", "gen-doc", "submit-template" ], default="show")
 parser.add_argument('-p', '--pipelines', type=str, required=False, dest='pipelines', help="Path to pipeline confs to run against. Should be relative to the projects root folder.", default="pipelines/*/*.conf")
-parser.add_argument('-c', '--cluster', type=str, required=False, dest='cluster', help="Target cluster to set the template on. 'http://t-crash-elklb-1/:9200' will issue the template on the cluster.", default="http://t-crash-elklb-1/:9200")
+parser.add_argument('-c', '--cluster', type=str, required=False, dest='cluster', help="Target cluster to set the template on. Example: 'http://172.16.78.100:9200'")
+
 #parser.add_argument('-p', '--pipelines', type=str, nargs='+', required=True, dest='pipelines', help="Paths to pipeline confs to run against. Should be relative to the projects root folder.")
 
 argvars = vars( parser.parse_args() )
+
+if argvars["action"] == "submit-template" and argvars["cluster"] is None:
+    parser.error("--pipelines submit-template requires --cluster")
+
 print()
 
 
@@ -434,11 +443,16 @@ if argvars["action"] == "gen-doc":
 if argvars["action"] == "show" or argvars["action"] == "submit-template":
    
     if argvars["action"] == "submit-template":
-        yes_no = input("\nSollen die oben stehenden Templates wirklich an des Server " + argvars["cluster"] + " geschickt werden? [y/N] ")
+        yes_no = input("\nSollen die oben stehenden Templates wirklich an den Server " + argvars["cluster"] + " geschickt werden? [y/N] ")
         if yes_no == '' or yes_no[0].lower().strip() != 'y':
             print("\nAktion wurde nicht durchgeführt.\n")
             exit()
-        
+#        user = input("\nServer-Benutzer: [] ")
+#        if user == '' or user[0].lower().strip() == '':
+#            print("\nKein Benutzername angegeben. Aktion abgebrochen.\n")
+#        passwd = getpass.getpass("\nPasswort: ")
+#        if passwd == '':
+#            print("\nProbleme bei der Passworteingabe. Aktion abgebrochen.\n")
     
     avm_must = {}
     for p in avm_pipelines:
@@ -502,17 +516,23 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         else:
             with open(root_dir+"standard-template.json", 'r') as f_template:
                 template = json.loads( withdraw_comments(f_template) )
-                template.update({"index_patterns": [ os.path.basename(root_dir+p+".conf")[:-5]+"*" ]}),
+                #template.update({"index_patterns": [ os.path.basename(root_dir+p+".conf")[:-5]+"*" ]}),
+        
         #deep_update(template, result, conflict_action="error")
         deep_update(result, template, conflict_action="override")
+
+        templateName = "genutil-prototest-"+p[10:].replace("/", "-")
+        result.update({"index_patterns": [ templateName+"*" ]})
         
-        #print( json.dumps(template, indent=4, sort_keys=True) )
-#        if argvars["action"] == "show":
         print( json.dumps(result, indent=4, sort_keys=True) )
         print ()
         
         if argvars["action"] == "submit-template":
-            print("#    RESULT SUBMITTED")
+            resp = requests.put(argvars["cluster"]+'/_template/'+templateName, json=result)
+            if resp.status_code == 200:
+                print( "#    TEMPLATE AKTUALISIERUNG ERFOLGREICH: " + str(resp.content) )
+            else:
+                print("#    TEMPLATE AKTUALISIERUNG FEHLGESCHLAGEN: " + str(resp.content) )
     
     if argvars["action"] == "submit-template":
         print("\nAktion wurde durchgeführt.\n")

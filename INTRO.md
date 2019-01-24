@@ -74,10 +74,15 @@ Jedes Feld innerhalb aller zur Pipeline gehörigen Must-Dateien (JSON-Erwartunge
 
 Beispiel: `./run-show-template.sh pipelines/reporting-backend-service/fw-reports.conf`
 
-##### Übertragung an Crashreport-Cluster übertragen (zur Zeit nur ein Mock ohne Funktion)
+##### Übertragung an Cluster http://172.16.78.100:9200
 
 Beispiel: `./run-submit-template.sh pipelines/reporting-backend-service/*.conf`
 
+Damit der Produktivbetrieb nicht gestört wird, werden die Templates während der Testphase nach diesem Namensmuster angelegt: genutil-prototest-&lt;beat_type>-&lt;service_type>
+
+Auch die Index-Patterns werden während der Testphase nach diesem Muster angelegt: genutil-prototest-&lt;beat_type>-&lt;service_type>*
+
+Die Kommunikation läuft derzeit über http ohne Login-Daten. Kommunikation über https mit Login-Daten liegt im doc/genutil.py größtenteils bereits auskommentiert vor.
 
 #### Curator Konfiguration
 

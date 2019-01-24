@@ -2,8 +2,8 @@
 ########################################
 # global mapping parameters:
 ########################################
-coerce: false
-ignore_malformed: true
+#coerce: false
+#ignore_malformed: true
 
 
 
@@ -29,13 +29,11 @@ fields:
   - name: base
     fields:
       - name: "@timestamp"
-        testflag: foobar
   - name: message
     fielddata: true
   - name: event
     fields:
       - name: category
-        testflag: foo
         type: int
         fields:
           - name: subtest
@@ -45,8 +43,6 @@ fields:
       - name: version
         coerce: true
       - name: name
-        fielddata: true
-        ignore_above: 123
   - name: http
     fields:
       - name: response

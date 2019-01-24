@@ -2,3 +2,4 @@ confluent-kafka
 jsonpath-rw
 urllib3
 pyyaml
+requests
