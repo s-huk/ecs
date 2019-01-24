@@ -62,19 +62,19 @@ Benennungsmuster der JSON-Dateien:
 
 Conf- und JSON-Files werden als zueinander passend betrachtet und getestet, wenn der Base-Filename (d.h. conf_filename_ohne_extension) und auch der relative Pfad zum jeweiligen pipelines-Ordner gleich sind.
 
-#### Dokumentation aktualisieren (experimental)
+#### Dokumentation aktualisieren
 
 Nach dem Verändern von Pipelines sollte stets die Dokumentation (diese README.md) generiert und ins mit ins git eingecheckt werden werden. Die Generierung der README-Dokumentation geschieht mittels `./run-doc-generation.sh`
 
-#### Mapping generieren (experimental)
+##### Mapping-Template ausgeben - inkl. Konsolen-Vorschau der Zuordnung aller erwarteten Felder (d.h. Felder aus MUST-Files) in die gegebene Schema-Definition:
 
-Beispiel: `./run-template-tools.sh pipelines/reporting-backend-service/*.conf`
+Beispiel: `./run-show-template.sh pipelines/reporting-backend-service/fw-reports.conf`
+
+#### Mapping-Template an Crashreport-Cluster übertragen (zur Zeit nur ein Mock ohne Funktion)
+
+Beispiel: `./run-submit-template.sh pipelines/reporting-backend-service/*.conf`
 
 Jedes Feld innerhalb aller zur Pipeline gehörigen Must-Dateien (JSON-Erwartungen) wird gemäß zugrunde liegender Schema-Definition automatisch in das Mapping übernommen, sofern auch eine Schema-Definition für dieses Feld vorliegt (d.h. sofern das Feld nicht verwaist ist). Alle benötigten Felder müssen also entweder Schema-treu benannt und durch Testfälle (MUST-Dateien) abgedeckt sein - oder alternativ manuell in das ensprechenden Mapping-Template (also die JSON-Datei neben dem Conf-File) eingetragen werden.
-
-##### Konsolen-Vorschau der Zuordnung aller erwarteten Felder (d.h. Felder aus MUST-Files) in die gegebene Schema-Definition:
-
-`./run-stat.sh pipelines/reporting-backend-service/fw-reports.conf`
 
 
 #### Curator Konfiguration
