@@ -119,4 +119,19 @@ actions:
       direction: older
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 3      
+      unit_count: 3
+  9:
+    action: delete_indices
+    description: delete avm-paloalto-pa_threat-*
+    options:
+      ignore_empty_list: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: avm-paloalto-pa_threat-
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: days
+      unit_count: 90
