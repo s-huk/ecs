@@ -32,11 +32,11 @@ Dieses Repository beinhaltet alle Quellen und Tools für Logstash-Pipelines der 
 
 Wenn Anpassungen am Projekt vorgenommen werden müssen, kann das lokal vorbereitet und getestet werden.
 
-#### Setup
+### Setup
 
 Einmalig müssen mittels `make setup` Abhängigkeiten für den [Kafka Consumer](run-kafka-consumer.sh) und die [Logstash Testumgebung](run-testbundle.sh) initialisiert werden.
 
-#### Pipeline anlegen
+### Pipeline anlegen
 
 1. Pipeline mit Filter und Output im entsprechenden Verzeichnis anlegen
 2. Pipeline in pipelines.yml definieren
@@ -45,7 +45,7 @@ Einmalig müssen mittels `make setup` Abhängigkeiten für den [Kafka Consumer](
 5. git Commit erstellen, nach gitlab pushen und mittels eine Merge-Requests in master-Branch mergen.
 6. Nachdem der Merge-Request submitted wurde, läuft das [Deplyoment der Konfiguration ins Staging-System via Jenkins](https://jenkins.avm.de/job/elastic/job/logstash-config-sync-stage/).
 
-#### Pipeline testen
+### Pipeline testen
 
 - **Hilfe anzeigen:** `./run-testbundle.sh -h`
 - **Tests starten:** `./run-testbundle.sh` <br>
@@ -62,11 +62,11 @@ Benennungsmuster der JSON-Dateien:
 
 Conf- und JSON-Files werden als zueinander passend betrachtet und getestet, wenn der Base-Filename (d.h. conf_filename_ohne_extension) und auch der relative Pfad zum jeweiligen pipelines-Ordner gleich sind.
 
-#### Dokumentation aktualisieren
+### Dokumentation aktualisieren
 
 Nach dem Verändern von Pipelines sollte stets die Dokumentation (diese README.md) generiert und ins mit ins git eingecheckt werden werden. Die Generierung der README-Dokumentation geschieht mittels `./run-doc-generation.sh`
 
-#### Mapping-Template
+### Mapping-Template
 
 Jedes Feld innerhalb aller zur Pipeline gehörigen Must-Dateien (JSON-Erwartungen) wird gemäß zugrunde liegender Schema-Definition automatisch in das Mapping übernommen, sofern auch eine Schema-Definition für dieses Feld vorliegt (d.h. sofern das Feld nicht verwaist ist). Alle benötigten Felder müssen also entweder Schema-treu benannt und durch Testfälle (MUST-Dateien) abgedeckt sein - oder alternativ manuell in das ensprechenden Mapping-Template (also die JSON-Datei neben dem Conf-File) eingetragen werden.
 
@@ -84,7 +84,23 @@ Auch die Index-Patterns werden während der Testphase nach diesem Muster angeleg
 
 Die Kommunikation läuft derzeit über http ohne Login-Daten. Kommunikation über https mit Login-Daten liegt im doc/genutil.py größtenteils bereits auskommentiert vor.
 
-#### Curator Konfiguration
+### Zusammenfassender Workflow zum Anlegen neuer Pipelines
+
+1. Aktualität des ECS überprüfen `./doc/fieldscompare.sh`
+2. ECS-Update mit Hilfe der Diff-Ausgabe aus Schritt 1 abwägen: `./doc/fieldsupdate.sh`
+3. Ggf. neu benötigte Felder im Schema hinterlegen:
+    * doc/ecs_extension.yml (für Erweiterungen am ECS-Schema)
+    * doc/avm-schema/*.yml (hier liegen die Schema-Definitionen benutzerdefinierter AVM-Felder)
+4. Input-Datei erstellen nach dem Muster: testing/pipelines/&lt;beat_type>/&lt;service_type>_[0-9]_in.json. Initial können die Daten gesammelt werden aus Kafka: `./run-kafka-consumer.sh --topic ("ops_filebeat" | "ops_metricbeat" | "ops_packetbeat") [--max-records number]`
+5. Conf-Datei erstellen nach dem Muster: pipelines/&lt;beat_type>/&lt;service_type>.conf
+6. Test ausführen, um den gewünschten initialen Input für die Must-Datei zu erhalten: `./run-testbundle.sh pipelines/<beat_type>/<service_type>.conf`
+7. Must-Datei erstellen nach dem Muster: testing/pipelines/&lt;beat_type>/&lt;service_type>_[0-9]_must.json.
+8. Mapping-Template überprüfen mit `./run-show-template.sh pipelines/<beat_type>/<service_type>.conf`
+9. Feld-Doku neu generieren: `./run-doc-generator.sh`
+10. (Experimentell) Mapping an Server übertragen: `./run-submit-template.sh pipelines/<beat_type>/<service_type>.conf`
+
+
+### Curator Konfiguration
 
 - Curator wird gegenwärtig stündlich per Cronjob gestartet
 - Logs finden sich unter /var/log/curator/curator.log / Logrotate ist aktiviert
