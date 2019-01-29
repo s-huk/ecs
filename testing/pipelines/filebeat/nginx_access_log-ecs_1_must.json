@@ -1,0 +1,42 @@
+{
+  "@timestamp": "2019-01-29T09:04:18.000Z",
+  "@version": "1",
+  "app_name": "http-download",
+  "avm": {
+    "host": "download1"
+  },
+  "client": {
+    "ip": "79.235.32.121"
+  },
+  "http": {
+    "request": {
+      "method": "GET",
+      "referrer": "-"
+    },
+    "response": {
+      "bytes": "135659",
+      "status_code": "200"
+    },
+    "version": "1.1"
+  },
+  "read_timestamp": "2019-01-29T09:04:19.175Z",
+  "tags": [
+    "beats_input_codec_plain_applied"
+  ],
+  "url": {
+    "original": "/bpjm/135397/bpjm_20190128_bpjm-modul_01_19.txt.data"
+  },
+  "user": {
+    "name": "-"
+  },
+  "user_agent": {
+    "build": "",
+    "device": {
+      "name": "Other"
+    },
+    "name": "Other",
+    "original": "-",
+    "os": "Other",
+    "os_name": "Other"
+  }
+}

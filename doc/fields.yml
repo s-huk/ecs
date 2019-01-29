@@ -9,7 +9,7 @@
       title: Agent
       group: 2
       description: >
-        The agent fields contain the data about the software entity, if any, that collects, detects, or observes events on a host, or takes measurements on a host. Examples include beats. Agents may also run on devices. ECS agent.* fields shall be populated with details of the agent running on the host or device where the event happened or the measurement was taken.
+        The agent fields contain the data about the software entity, if any, that collects, detects, or observes events on a host, or takes measurements on a host. Examples include Beats. Agents may also run on observers. ECS agent.* fields shall be populated with details of the agent running on the host or observer where the event happened or the measurement was taken.
       footnote: >
         Examples: In the case of Beats for logs, the agent.name is filebeat. For APM, it is the
         agent running in the app/service. The agent information does not change if
@@ -118,6 +118,68 @@
             In other use cases the message field can be used to concatenate
             different values which are then freely searchable. If multiple
             messages exist, they can be combined into one message.
+    
+    - name: client
+      title: Client
+      group: 2
+      description: >
+        A client is defined as the initiator of a network connection for events regarding sessions, connections, or bidirectional flow records. For TCP events, the client is the initiator of the TCP connection that sends the SYN packet(s). For other protocols, the client is generally the initiator or requestor in the network transaction. Some systems use the term "originator" to refer the client in TCP connections. The client fields describe details about the system acting as the client in the network event. Client fields are usually populated in conjunction with server fields.  Client fields are generally not populated for packet-level events.
+    
+        Client / server representations can add semantic context to an exchange, which is helpful to visualize the data in certain situations. If your context falls in that category, you should still ensure that source and destination are filled appropriately.
+      type: group
+      fields:
+    
+        - name: address
+          level: extended
+          type: keyword
+          description: >
+            Some event client addresses are defined ambiguously. The event will
+            sometimes list an IP, a domain or a unix socket.  You should always
+            store the raw address in the `.address` field.
+    
+            Then it should be duplicated to `.ip` or `.domain`, depending on which
+            one it is.
+    
+        - name: ip
+          level: core
+          type: ip
+          description: >
+            IP address of the client.
+    
+            Can be one or multiple IPv4 or IPv6 addresses.
+    
+        - name: port
+          level: core
+          type: long
+          description: >
+            Port of the client.
+    
+        - name: mac
+          level: core
+          type: keyword
+          description: >
+            MAC address of the client.
+    
+        - name: domain
+          level: core
+          type: keyword
+          description: >
+            Client domain.
+    
+        # Metrics
+        - name: bytes
+          level: core
+          type: long
+          example: 184
+          description: >
+            Bytes sent from the client to the server.
+    
+        - name: packets
+          level: core
+          type: long
+          example: 12
+          description: >
+            Packets sent from the client to the server.
     
     - name: cloud
       title: Cloud
@@ -238,10 +300,21 @@
       title: Destination
       group: 2
       description: >
-        Destination fields describe details about the destination of a
-        packet/event.
+        Destination fields describe details about the destination of a packet/event.
+        Destination fields are usually populated in conjunction with source fields.
       type: group
       fields:
+    
+        - name: address
+          level: extended
+          type: keyword
+          description: >
+            Some event destination addresses are defined ambiguously. The event will
+            sometimes list an IP, a domain or a unix socket.  You should always
+            store the raw address in the `.address` field.
+    
+            Then it should be duplicated to `.ip` or `.domain`, depending on which
+            one it is.
     
         - name: ip
           level: core
@@ -284,54 +357,6 @@
           description: >
             Packets sent from the destination to the source.
     
-    - name: device
-      title: Device
-      group: 2
-      description: >
-        Device fields are used to provide additional information about the device
-        that is the source of the information. This could be a firewall, network device, etc.
-      type: group
-      fields:
-        - name: mac
-          level: core
-          type: keyword
-          description: >
-            MAC address of the device
-        - name: ip
-          level: core
-          type: ip
-          description: >
-            IP address of the device.
-        - name: hostname
-          level: core
-          type: keyword
-          description: >
-            Hostname of the device.
-        - name: vendor
-          level: core
-          type: keyword
-          description: >
-            Device vendor information.
-        - name: version
-          level: core
-          type: keyword
-          description: >
-            Device version.
-        - name: serial_number
-          level: extended
-          type: keyword
-          description: >
-            Device serial number.
-        - name: type
-          level: core
-          type: keyword
-          description: >
-            The type of the device the data is coming from.
-    
-            There is no predefined list of device types. Some examples are
-            `endpoint`, `firewall`, `ids`, `ips`, `proxy`.
-          example: firewall
-    
     - name: ecs
       title: ECS
       group: 2
@@ -351,8 +376,8 @@
             different ECS versions -- this field lets integrations adjust to the
             schema version of the events.
     
-            The current version is 1.0.0-beta1 .
-          example: 1.0.0-beta1
+            The current version is 1.0.0-beta2 .
+          example: 1.0.0-beta2
     
     - name: error
       title: Error
@@ -396,35 +421,64 @@
             Unique ID to describe the event.
           example: 8a4f500d
     
+        - name: kind
+          level: extended
+          type: keyword
+          description: >
+            The kind of the event.
+    
+            This gives information about what type of information the event
+            contains, without being specific to the contents of the event.  Examples
+            are `event`, `state`, `alarm`. Warning: In future versions of ECS, we
+            plan to provide a list of acceptable values for this field, please use
+            with caution.
+          example: state
+    
         - name: category
           level: core
           type: keyword
           description: >
             Event category.
     
-            This can be a user defined category.
-          example: metrics
+            This contains high-level information about the contents of the event. It
+            is more generic than `event.action`, in the sense that typically a
+            category contains multiple actions. Warning: In future versions of ECS,
+            we plan to provide a list of acceptable values for this field, please
+            use with caution.
     
-        - name: type
-          level: core
-          type: keyword
-          description: >
-            A type given to this kind of event which can be used for grouping.
-    
-            This is normally defined by the user.
-          example: nginx-stats-metrics
+          example: user-management
     
         - name: action
           level: core
           type: keyword
           description: >
-            The action captured by the event. The type of action will vary from
-            system to system but is likely to include actions by security services,
-            such as blocking or quarantining; as well as more generic actions such
-            as login events, file i/o or proxy forwarding events.
+            The action captured by the event.
     
-            The value is normally defined by the user.
-          example: reject
+            This describes the information in the event. It is more specific than
+            `event.category`. Examples are `group-add`, `process-started`,
+            `file-created`. The value is normally defined by the implementer.
+          example: user-password-change
+    
+        - name: outcome
+          level: extended
+          type: keyword
+          description: >
+            The outcome of the event.
+    
+            If the event describes an action, this fields contains the outcome of
+            that action. Examples outcomes are `success` and `failure`. Warning: In
+            future versions of ECS, we plan to provide a list of acceptable values
+            for this field, please use with caution.
+    
+          example: success
+    
+        - name: type
+          level: core
+          type: keyword
+          description: >
+            Reserved for future usage.
+    
+            Please avoid using this field for user data.
     
         - name: module
           level: core
@@ -490,6 +544,17 @@
     
             If event.start and event.end are known this value should be the
             difference between the end and start time.
+    
+        - name: timezone
+          level: extended
+          type: keyword
+          description: >
+            This field should be populated when the event's timestamp does not include
+            timezone information already (e.g. default Syslog timestamps). It's
+            optional otherwise.
+    
+            Acceptable timezone formats are: a canonical ID (e.g. "Europe/Amsterdam"),
+            abbreviated (e.g. "EST") or an HH:mm differential (e.g. "-05:00").
     
         - name: created
           level: core
@@ -632,9 +697,11 @@
       reusable:
         top_level: false
         expected:
+          - client
           - destination
-          - device
+          - observer
           - host
+          - server
           - source
       type: group
       fields:
@@ -688,13 +755,31 @@
             Region ISO code.
           example: CA-QC
     
+        - name: name
+          level: extended
+          type: keyword
+          description: >
+            User-defined description of a location, at the level of granularity they care about.
+    
+            Could be the name of their data centers, the floor number, if this describes
+            a local physical entity, city names.
+    
+            Not typically used in automated geolocation.
+          example: boston-dc
+    
     - name: group
       title: Group
       group: 2
+      type: group
       description: >
         The group fields are meant to represent groups that are relevant to the
         event.
-      type: group
+    
+      reusable:
+        top_level: true
+        expected:
+          - user
+    
       fields:
     
         - name: id
@@ -787,7 +872,17 @@
           type: keyword
           description: >
             Http request method.
-          example: GET, POST, PUT
+    
+            The field value must be normalized to lowercase for querying. See
+            "Lowercase Capitalization" in the "Implementing ECS"  section.
+          example: get, post, put
+    
+        - name: request.body.content
+          level: extended
+          type: keyword
+          description: >
+            The full http request body.
+          example: Hello world
     
         - name: request.referrer
           level: extended
@@ -803,7 +898,7 @@
             Http response status code.
           example: 404
     
-        - name: response.body
+        - name: response.body.content
           level: extended
           type: keyword
           description: >
@@ -816,6 +911,36 @@
           description: >
             Http version.
           example: 1.1
+    
+        # Metrics
+        - name: request.bytes
+          level: extended
+          type: long
+          description: >
+            Total size in bytes of the request (body and headers).
+          example: 1437
+    
+        - name: request.body.bytes
+          level: extended
+          type: long
+          description: >
+            Size in bytes of the request body.
+          example: 887
+    
+        - name: response.bytes
+          level: extended
+          type: long
+          description: >
+            Total size in bytes of the response (body and headers).
+          example: 1437
+    
+        - name: response.body.bytes
+          level: extended
+          type: long
+          description: >
+            Size in bytes of the response body.
+          example: 887
+    
     
     - name: log
       title: Log
@@ -871,8 +996,11 @@
           level: core
           type: keyword
           description: >
-            In the OSI Model this would be the Network Layer. IPv4, IPv6, IPSec, PIM, etc
-          example: IPv4
+            In the OSI Model this would be the Network Layer. ipv4, ipv6, ipsec, pim, etc
+    
+            The field value must be normalized to lowercase for querying. See
+            "Lowercase Capitalization" in the "Implementing ECS" section.
+          example: ipv4
     
         - name: iana_number
           level: extended
@@ -888,8 +1016,11 @@
           type: keyword
           description: >
             Same as network.iana_number, but instead using the Keyword name of the
-            transport layer (UDP, TCP, IPv6-ICMP, etc.)
-          example: TCP
+            transport layer (udp, tcp, ipv6-icmp, etc.)
+    
+            The field value must be normalized to lowercase for querying. See
+            "Lowercase Capitalization" in the "Implementing ECS"  section.
+          example: tcp
     
         - name: application
           level: extended
@@ -900,13 +1031,19 @@
             facebook, twitter. This would be used in situations where the vendor
             or service can be decoded such as from the source/dest IP owners,
             ports, or wire format.
-          example: AIM
+    
+            The field value must be normalized to lowercase for querying. See
+            "Lowercase Capitalization" in the "Implementing ECS" section.
+          example: aim
     
         - name: protocol
           level: core
           type: keyword
           description: >
-            L7 Network protocol name. ex. http, lumberjack, transport protocol
+            L7 Network protocol name. ex. http, lumberjack, transport protocol.
+    
+            The field value must be normalized to lowercase for querying. See
+            "Lowercase Capitalization" in the "Implementing ECS" section.
           example: http
     
         - name: direction
@@ -966,6 +1103,53 @@
             If `source.packets` and `destination.packets` are known, `network.packets` is their sum.
           example: 24
     
+    - name: observer
+      title: Observer
+      group: 2
+      description: >
+        An observer is defined as a special network, security, or application device used to detect, observe, or create network, security, or application-related events and metrics. This could be a custom hardware appliance or a server that has been configured to run special network, security, or application software. Examples include firewalls, intrusion detection/prevention systems, network monitoring sensors, web application firewalls, data loss prevention systems, and APM servers. The observer.* fields shall be populated with details of the system, if any, that detects, observes and/or creates a network, security, or application event or metric. Message queues and ETL components used in processing events or metrics are not considered observers in ECS.  
+      type: group
+      fields:
+        - name: mac
+          level: core
+          type: keyword
+          description: >
+            MAC address of the observer
+        - name: ip
+          level: core
+          type: ip
+          description: >
+            IP address of the observer.
+        - name: hostname
+          level: core
+          type: keyword
+          description: >
+            Hostname of the observer.
+        - name: vendor
+          level: core
+          type: keyword
+          description: >
+            observer vendor information.
+        - name: version
+          level: core
+          type: keyword
+          description: >
+            Observer version.
+        - name: serial_number
+          level: extended
+          type: keyword
+          description: >
+            Observer serial number.
+        - name: type
+          level: core
+          type: keyword
+          description: >
+            The type of the observer the data is coming from.
+    
+            There is no predefined list of observer types. Some examples are
+            `forwarder`, `firewall`, `ids`, `ips`, `proxy`, `poller`, `sensor`, `APM server`.
+          example: firewall
+    
     - name: organization
       title: Organization
       group: 2
@@ -995,7 +1179,7 @@
       reusable:
         top_level: false
         expected:
-          - device
+          - observer
           - host
           - user_agent
       type: group
@@ -1013,7 +1197,14 @@
           type: keyword
           example: "Mac OS X"
           description: >
-            Operating system name.
+            Operating system name, without the version.
+    
+        - name: full
+          level: extended
+          type: keyword
+          example: "Mac OS Mojave"
+          description: >
+            Operating system name, including the version or code name.
     
         - name: family
           level: extended
@@ -1025,7 +1216,7 @@
         - name: version
           level: extended
           type: keyword
-          example: "10.12.6-rc2"
+          example: "10.14.1"
           description: >
             Operating system version as a raw string.
     
@@ -1052,7 +1243,7 @@
           type: long
           description: >
             Process id.
-          example: ssh
+          exmple: ssh
     
         - name: name
           level: extended
@@ -1123,11 +1314,7 @@
         Some pieces of information can be seen in many places in ECS. To facilitate
         searching for them, append values to their corresponding field in
         `related.`.
-    
-        A concrete example is IP addresses, which can be under host, device, source,
-        destination, and network.forwarded_ip. If you append all IPs to
-        `related.ip`, you can then search for a given IP trivially,
-        no matter where it appeared, by querying `related.ip:a.b.c.d`.
+        A concrete example is IP addresses, which can be under host, observer, source, destination, client, server, and network.forwarded_ip. If you append all IPs to `related.ip`, you can then search for a given IP trivially, no matter where it appeared, by querying `related.ip:a.b.c.d`.
       type: group
       fields:
     
@@ -1136,6 +1323,68 @@
           type: ip
           description: >
             All of the IPs seen on your event.
+    
+    - name: server
+      title: Server
+      group: 2
+      description: >
+        A Server is defined as the responder in a network connection for events regarding sessions, connections, or bidirectional flow records. For TCP events, the server is the receiver of the initial SYN packet(s) of the TCP connection. For other protocols, the server is generally the responder in the network transaction. Some systems actually use the term "responder" to refer the server in TCP connections. The server fields describe details about the system acting as the server in the network event. Server fields are usually populated in conjunction with client fields. Server fields are generally not populated for packet-level events.
+    
+        Client / server representations can add semantic context to an exchange, which is helpful to visualize the data in certain situations. If your context falls in that category, you should still ensure that source and destination are filled appropriately.
+      type: group
+      fields:
+    
+        - name: address
+          level: extended
+          type: keyword
+          description: >
+            Some event server addresses are defined ambiguously. The event will
+            sometimes list an IP, a domain or a unix socket.  You should always
+            store the raw address in the `.address` field.
+    
+            Then it should be duplicated to `.ip` or `.domain`, depending on which
+            one it is.
+    
+        - name: ip
+          level: core
+          type: ip
+          description: >
+            IP address of the server.
+    
+            Can be one or multiple IPv4 or IPv6 addresses.
+    
+        - name: port
+          level: core
+          type: long
+          description: >
+            Port of the server.
+    
+        - name: mac
+          level: core
+          type: keyword
+          description: >
+            MAC address of the server.
+    
+        - name: domain
+          level: core
+          type: keyword
+          description: >
+            Server domain.
+    
+        # Metrics
+        - name: bytes
+          level: core
+          type: long
+          example: 184
+          description: >
+            Bytes sent from the server to the client.
+    
+        - name: packets
+          level: core
+          type: long
+          example: 12
+          description: >
+            Packets sent from the server to the client.
     
     - name: service
       title: Service
@@ -1221,10 +1470,21 @@
       title: Source
       group: 2
       description: >
-        Source fields describe details about the source of a
-        packet/event.
+        Source fields describe details about the source of a packet/event.
+        Source fields are usually populated in conjunction with destination fields.
       type: group
       fields:
+    
+        - name: address
+          level: extended
+          type: keyword
+          description: >
+            Some event source addresses are defined ambiguously. The event will
+            sometimes list an IP, a domain or a unix socket.  You should always
+            store the raw address in the `.address` field.
+    
+            Then it should be duplicated to `.ip` or `.domain`, depending on which
+            one it is.
     
         - name: ip
           level: core
@@ -1286,11 +1546,7 @@
             This field is meant to represent the URL as it was observed, complete
             or not.
           example: >
-            https://www.elastic.co:443/search?q=elasticsearch#top
-    
-            or
-    
-            /search?q=elasticsearch
+            https://www.elastic.co:443/search?q=elasticsearch#top or /search?q=elasticsearch
     
         - name: full
           level: extended
@@ -1376,8 +1632,10 @@
       reusable:
         top_level: true
         expected:
+          - client
           - destination
           - host
+          - server
           - source
       type: group
       fields:
@@ -1417,9 +1675,38 @@
             Useful if `user.id` or `user.name` contain confidential information and
             cannot be used.
     
-        - name: group
+    - name: user_agent
+      title: User agent
+      group: 2
+      description: >
+        The user_agent fields normally come from a browser request. They often
+        show up in web service logs coming from the parsed user agent string.
+      type: group
+      fields:
+    
+        - name: original
           level: extended
           type: keyword
           description: >
-            Group the user is a part of. This field can contain a list of groups, if
-            necessary.
+            Unparsed version of the user_agent.
+          example: "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1"
+    
+        - name: name
+          level: extended
+          type: keyword
+          example: Safari
+          description: >
+            Name of the user agent.
+        - name: version
+          level: extended
+          type: keyword
+          description: >
+            Version of the user agent.
+          example: 12.0
+    
+        - name: device.name
+          level: extended
+          type: keyword
+          example: iPhone
+          description: >
+            Name of the device.

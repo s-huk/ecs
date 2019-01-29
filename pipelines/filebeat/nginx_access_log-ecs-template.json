@@ -1,0 +1,11 @@
+{
+    "index_patterns": [
+        "avm-nginx_access_log*"
+    ],
+ "settings": {
+        "number_of_shards": 3
+    }
+
+}
+
+

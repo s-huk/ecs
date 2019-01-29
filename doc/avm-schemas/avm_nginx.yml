@@ -1,0 +1,7 @@
+---
+fields:
+  - name: avm
+    type: group
+    fields:
+      - name: host
+        type: keyword

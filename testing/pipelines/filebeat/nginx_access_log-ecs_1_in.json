@@ -1,0 +1,21 @@
+{
+  "@timestamp": "2019-01-29T09:04:19.175Z",
+  "@version": "1",
+  "app_name": "http-download",
+  "beat": {
+    "hostname": "download1",
+    "name": "download1",
+    "version": "5.6.14"
+  },
+  "host": "download1",
+  "input_type": "log",
+  "log_type": "nginx",
+  "message": "79.235.32.121 - - [29/Jan/2019:10:04:18 +0100] \"GET /bpjm/135397/bpjm_20190128_bpjm-modul_01_19.txt.data HTTP/1.1\" 200 135659 \"-\" \"-\"",
+  "offset": 10075888,
+  "source": "/var/log/nginx/access.log",
+  "tags": [
+    "beats_input_codec_plain_applied"
+  ],
+  "type": "log"
+}
+
