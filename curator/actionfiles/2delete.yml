@@ -119,7 +119,7 @@ actions:
       direction: older
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 3
+      unit_count: 4
   9:
     action: delete_indices
     description: delete avm-paloalto-pa_threat-*
