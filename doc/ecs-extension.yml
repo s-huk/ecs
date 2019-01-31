@@ -46,11 +46,9 @@ fields:
   - name: http
     fields:
       - name: response
-        fielddata: false
         fields:
           - name: status_code
-            coerce: true
-            #type: keyword
+            type: keyword
 ########################################
 # user_agent extension:
 ########################################

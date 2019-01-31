@@ -1,7 +1,6 @@
 {
   "@timestamp": "2019-01-29T09:04:18.000Z",
   "@version": "1",
-  "app_name": "http-download",
   "avm": {
     "host": "download1"
   },
@@ -18,6 +17,9 @@
       "status_code": "200"
     },
     "version": "1.1"
+  },
+  "fields": {
+    "service_type": "http-download"
   },
   "read_timestamp": "2019-01-29T09:04:19.175Z",
   "tags": [
