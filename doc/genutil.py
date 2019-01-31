@@ -350,7 +350,7 @@ m_extension = conv_fields_to_dict(extension)
 #exit()
 #print()
 #print()
-deep_update(m_extension["properties"], m_expanded, conflict_action="error")
+deep_update(m_extension["properties"], m_expanded, conflict_action=None) # "error"
 
 mapping = Mapping(m_extension)
 
