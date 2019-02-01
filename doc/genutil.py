@@ -1,11 +1,4 @@
-# OK: comparison of base fields e.g. with avm_must root
-# OK: README.md: display orphans (separately)
-# OK: deep merge of avm-fields OR prohibit types in extension.yml
-# OK: merge existing json template properties
-# OK: improve details of error message in case of missing type field
 # TODO: re-think acceptance of type-less fields
-# OK: console output doc of pipeline singletons
-# OK: check if template props override yml props
 import argparse
 import os
 import sys
@@ -26,6 +19,7 @@ parser = argparse.ArgumentParser(description='Run tooling related to elastic tem
 parser.add_argument('-a', '--action', type=str, required=False, dest='action', help="Action to run. 'show' will print the final template to stdout.", choices=[ "show", "gen-doc", "submit-template" ], default="show")
 parser.add_argument('-p', '--pipelines', type=str, required=False, dest='pipelines', help="Path to pipeline confs to run against. Should be relative to the projects root folder.", default="pipelines/*/*.conf")
 parser.add_argument('-c', '--cluster', type=str, required=False, dest='cluster', help="Target cluster to set the template on. Example: 'http://172.16.78.100:9200'")
+parser.add_argument('-u', '--user', type=str, required=False, dest='user', help="Username to connect with.")
 
 #parser.add_argument('-p', '--pipelines', type=str, nargs='+', required=True, dest='pipelines', help="Paths to pipeline confs to run against. Should be relative to the projects root folder.")
 
@@ -97,10 +91,10 @@ def deep_update(d, inset, conflict_action):
                 else:
                     if d[k] != inset[k] and conflict_action:
                         if conflict_action == "override":
+                            print ( "# WARNING: value override: '"+str_path+"."+k+"':  +"+str(inset[k])+" -"+str(d[k]) )
                             d[k] = inset[k]
-                            print ( "# WARNING: value overridden: '"+str_path+"."+k+"':  "+str(inset[k])+" => "+str(d[k]) )
                         elif conflict_action == "error":
-                            raise Exception( "error: found conflict: unable to override '"+str_path+"."+k+"':  "+str(inset[k])+" => "+str(d[k]) )
+                            raise Exception( "error: found conflict: illegal override '"+str_path+"."+k+"':  +"+str(inset[k])+" -"+str(d[k]) )
 
     deep_update(d, inset, conflict_action, "")
 
@@ -284,7 +278,7 @@ def expand_ecs_fields_to_mapping(f):
 
     return result
 
-
+# removes trailing whitespaces from values
 def strip_json_values(f):
     if isinstance(f, dict):
         for key in f.keys():
@@ -296,6 +290,7 @@ def strip_json_values(f):
         for g in f:
             strip_json_values(g)
 
+# removes unnecessary fields which are incompatible with the es mapping syntax
 def prune_ecs_fields(f, assert_type_field_exists):
     list_keys_to_remove=[]
     if argvars["action"] != "gen-doc":
@@ -319,48 +314,34 @@ def prune_ecs_fields(f, assert_type_field_exists):
         for g in f:
             prune_ecs_fields(g, assert_type_field_exists)
 
-fields = []
+fields = {}
 with open(  root_dir+"/doc/fields.yml", 'r') as ecs_fields_yml:
     fields = yaml.load(ecs_fields_yml)[0]["fields"]
+    strip_json_values(fields)
+    prune_ecs_fields(fields, assert_type_field_exists=True)
+    fields = { "properties": expand_ecs_fields_to_mapping(fields) }
+
+with open(  root_dir+"/doc/ecs-extension.yml", 'r') as f_extension:
+    avmyml = yaml.load(f_extension.read())
+    if "fields" in avmyml:
+        avmyml = avmyml["fields"]
+        strip_json_values(avmyml)
+        prune_ecs_fields(avmyml, assert_type_field_exists=False)
+        deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="override")
 
 for path in sorted(glob.glob(root_dir+"doc/avm-schemas/*.yml")):
-    with open(path, 'r') as f:
+    with open(path, 'r') as f:        
         avmyml = yaml.load(f.read())
         if "fields" in avmyml:
-            fields = fields + avmyml["fields"]
+            avmyml = avmyml["fields"]
+            strip_json_values(avmyml)
+            prune_ecs_fields(avmyml, assert_type_field_exists=True)
+            deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="override")
         else:
             raise Exception("ERROR: missing keyword 'field:' in yaml file: " + path)
 
-#print (  fields )
-strip_json_values(fields)
-prune_ecs_fields(fields, assert_type_field_exists=True)
-m_expanded = expand_ecs_fields_to_mapping(fields)
-#print (  m_expanded  )
-#print()
-#print()
-with open(  root_dir+"/doc/ecs-extension.yml", 'r') as f_extension:
-    extension = yaml.load(f_extension)
 
-#print( extension )
-
-strip_json_values(extension)
-prune_ecs_fields(extension["fields"], assert_type_field_exists=False)
-m_extension = conv_fields_to_dict(extension)    
-#print( m_extension )
-#exit()
-#print()
-#print()
-deep_update(m_extension["properties"], m_expanded, conflict_action=None) # "error"
-
-mapping = Mapping(m_extension)
-
-#mtest = Mapping(m_expanded)
-#mtest.print()
-#mapping.print()
-#print()
-#print()
-#print( json.dumps(mapping.mapping, indent=3, sort_keys=True) )
-#exit()
+mapping = Mapping(fields)
 
 
 ###################################################################################
@@ -404,9 +385,6 @@ if argvars["action"] == "gen-doc":
             if path.startswith("base."):
                 path = path[5:]
             
-
-            #def get_markdown_row(path, field):
-            #path = ".".join(path)
             # Replace newlines with HTML representation as otherwise newlines don't work in Markdown
             description = str(field.get("description", "")).replace("\n", "<\br>").replace('"','').replace('[','').replace(']','')
             
@@ -447,7 +425,10 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         if yes_no == '' or yes_no[0].lower().strip() != 'y':
             print("\nAktion wurde nicht durchgeführt.\n")
             exit()
-#        user = input("\nServer-Benutzer: [] ")
+#        if argvars["user"] is None:
+#            user = input("\nServer-Benutzer: [] ")
+#        else:
+#            user = argvars["user"]
 #        if user == '' or user[0].lower().strip() == '':
 #            print("\nKein Benutzername angegeben. Aktion abgebrochen.\n")
 #        passwd = getpass.getpass("\nPasswort: ")
@@ -506,33 +487,75 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         # end: print schema
         #
 
+
+        # create auto-generated template => gen_template
         avmmust_flat = list(set([a for a in avm_must[p]]))
-        #result = mapping.collate_mapping(avmmust_flat)
-        result = mapping.collate_template(avmmust_flat)
+        gen_template = mapping.collate_template(avmmust_flat)  # mapping.collate_mapping(avmmust_flat)
+
+        # override standard template json with auto-generated template => result
+        f_std_template = open(root_dir+"standard-template.json", 'r')
+        result = json.loads( withdraw_comments(f_std_template) )
+        deep_update(result, gen_template, conflict_action="override")
         
+        # override generated template with information from pipeline-specific template json
         if os.path.isfile( root_dir+p+"-template.json" ):
             with open(root_dir+p+"-template.json", 'r') as f_template:
-                template = json.loads( withdraw_comments(f_template) )
-        else:
-            with open(root_dir+"standard-template.json", 'r') as f_template:
-                template = json.loads( withdraw_comments(f_template) )
-                #template.update({"index_patterns": [ os.path.basename(root_dir+p+".conf")[:-5]+"*" ]}),
-        
-        #deep_update(template, result, conflict_action="error")
-        deep_update(result, template, conflict_action="override")
+                pipeline_template = json.loads( withdraw_comments(f_template) )
+                deep_update(result, pipeline_template, conflict_action="override")
 
-        templateName = "genutil-prototest-"+p[10:].replace("/", "-")
-        result.update({"index_patterns": [ templateName+"*" ]})
+        # set index pattern if necessary
+        templateName = p[10:].replace("/", "-")
+        if not "index_patterns" in result:
+            result.update({"index_patterns": [ "genutil-prototest-"+templateName+"-*" ]})
         
+        # output resulting es template
         print( json.dumps(result, indent=4, sort_keys=True) )
         print ()
         
         if argvars["action"] == "submit-template":
+            if not "index_patterns" in result or not isinstance(result["index_patterns"], list) or not len(result["index_patterns"]) == 1 or not result["index_patterns"][0].endswith("*"):
+                print("Die Vorgabe des Index-Patterns ist individuell-uneindeutig. Daher wird die automatische Übermittlung von Template-, Index- und Alias-Daten nicht durchgeführt. ")
+                exit()
+            
+            # TEMPLATE CREATION
             resp = requests.put(argvars["cluster"]+'/_template/'+templateName, json=result)
             if resp.status_code == 200:
-                print( "#    TEMPLATE AKTUALISIERUNG ERFOLGREICH: " + str(resp.content) )
+                print( "#    TEMPLATE "+templateName+" AKTUALISIERUNG ERFOLGREICH: " + str(resp.content) )
             else:
-                print("#    TEMPLATE AKTUALISIERUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                print("#    TEMPLATE "+templateName+" AKTUALISIERUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                exit()
+            
+            # INDEX CREATION
+            index_prefix = result["index_patterns"][0][:-2] if result["index_patterns"][0][-2:] == "-*" else result["index_patterns"][0][:-1]
+            resp = requests.head(argvars["cluster"]+'/'+index_prefix+'-1')
+            if resp.status_code == 200:
+                print( "#    INDEX EXISTIERT BEREITS" )
+            elif resp.status_code == 404:
+                resp = requests.put(argvars["cluster"]+'/'+index_prefix+'-1')
+                if resp.status_code == 200:
+                    print( "#    INDEX "+index_prefix+"-1 ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
+                else:
+                    print("#    INDEX "+index_prefix+"-1 ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                    exit()
+            else:
+                print("Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1")
+                exit()
+            
+            # ALIAS CREATION
+            resp = requests.head(argvars["cluster"]+'/_aliases/'+index_prefix)
+            if resp.status_code == 200:
+                print( "#    ALIAS EXISTIERT BEREITS" )
+            elif resp.status_code == 404:
+                resp = requests.post(argvars["cluster"]+'/_aliases', json={"actions":[{"add":{"index":index_prefix+'-1',"alias":index_prefix}}]})
+                if resp.status_code == 200:
+                    print( "#    ALIAS "+index_prefix+" ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
+                else:
+                    print("#    ALIAS "+index_prefix+" ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                    exit()
+            else:
+                print("Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix)
+                exit()
+
     
     if argvars["action"] == "submit-template":
         print("\nAktion wurde durchgeführt.\n")
