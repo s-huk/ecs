@@ -70,17 +70,21 @@ Nach dem Verändern von Pipelines sollte stets die Dokumentation (diese README.m
 
 Jedes Feld innerhalb aller zur Pipeline gehörigen Must-Dateien (JSON-Erwartungen) wird gemäß zugrunde liegender Schema-Definition automatisch in das Mapping übernommen, sofern auch eine Schema-Definition für dieses Feld vorliegt (d.h. sofern das Feld nicht verwaist ist). Alle benötigten Felder müssen also entweder Schema-treu benannt und durch Testfälle (MUST-Dateien) abgedeckt sein - oder alternativ manuell in das ensprechenden Mapping-Template (also die JSON-Datei neben dem Conf-File) eingetragen werden.
 
+**Bei konfligierenden Schema-Definitionen gilt:**
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; optionales &lt;pipeline>-template.json &nbsp;&nbsp;&nbsp; **überschreibt** &nbsp;&nbsp;&nbsp; yml-schemas &nbsp;&nbsp;&nbsp; **überschreibt** &nbsp;&nbsp;&nbsp; standard-template.json
+
 ##### Konsolenausgabe - inkl. Konsolen-Vorschau der Zuordnung aller erwarteten Felder (d.h. Felder aus MUST-Files) in die gegebene Schema-Definition:
 
-Beispiel: `./run-show-template.sh pipelines/reporting-backend-service/fw-reports.conf`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Beispiel: `./run-show-template.sh pipelines/reporting-backend-service/fw-reports.conf`
 
 ##### Übertragung an Cluster http://172.16.78.100:9200
 
-Beispiel: `./run-submit-template.sh pipelines/reporting-backend-service/*.conf`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Beispiel: `./run-submit-template.sh pipelines/reporting-backend-service/*.conf`
 
-Damit der Produktivbetrieb nicht gestört wird, werden die Templates während der Testphase nach diesem Namensmuster angelegt: genutil-prototest-&lt;beat_type>-&lt;service_type>
-
-Auch die Index-Patterns werden während der Testphase nach diesem Muster angelegt: genutil-prototest-&lt;beat_type>-&lt;service_type>*
+_Damit der Produktivbetrieb nicht gestört wird, werden die Templates während der Testphase nach dem Namensmuster genutil-prototest-&lt;beat_type>-&lt;service_type> angelegt._
+_Auch die Index-Patterns werden während der Testphase nach dem Muster genutil-prototest-&lt;beat_type>-&lt;service_type> angelegt.*_
+_Bei Erstellung eines pipeline-spezifischen Template-Skeletons <pipeline>-template.json im entsprechenden pipelines-Ordner kann jedoch schon Einfluss auf die Bezeichnung von Templates samt zugehöriger Indexe und Alias genommen werden - und zwar durch einen Eintrag der Form: `"index_patterns": [ "avm-nginx_access_log*" ]`_
 
 Die Kommunikation läuft derzeit über http ohne Login-Daten. Kommunikation über https mit Login-Daten liegt im doc/genutil.py größtenteils bereits auskommentiert vor.
 
