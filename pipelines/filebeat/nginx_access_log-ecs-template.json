@@ -1,6 +1,6 @@
 {
     "index_patterns": [
-        "avm-nginx_access_log-*"
+        "nginx_access_log-ecs-*"
     ],
     "settings": {
         "number_of_shards": 3
