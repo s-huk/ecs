@@ -10,14 +10,11 @@
 - pipeline.id: apache_access_log-ecs
   path.config: "/etc/logstash/avm-git/pipelines/filebeat/apache_access_log-ecs.conf"
   
-- pipeline.id: http-download-legacy
-  path.config: "/etc/logstash/avm-git/pipelines/filebeat/http_download-legacy.conf"
+- pipeline.id: nginx_access_log-ecs
+  path.config: "/etc/logstash/avm-git/pipelines/filebeat/nginx_access_log-ecs.conf"
 
 - pipeline.id: ftp-download-legacy
   path.config: "/etc/logstash/avm-git/pipelines/filebeat/ftp_download-legacy.conf"
-
-#- pipeline.id: nginx_access_log-legacy
-#  path.config: "/etc/logstash/avm-git/pipelines/filebeat/nginx_access_log-legacy.conf"
 
 - pipeline.id: haproxy_access_log-legacy
   path.config: "/etc/logstash/avm-git/pipelines/filebeat/haproxy_access_log-legacy.conf"
