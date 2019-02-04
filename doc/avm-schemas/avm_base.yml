@@ -1,7 +1,7 @@
 ---
 fields:
-  - name: avm
+  - name: fields
     type: group
     fields:
-      - name: host
+      - name: service_type
         type: keyword

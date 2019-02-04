@@ -1,11 +1,15 @@
 {
     "index_patterns": [
-        "avm-nginx_access_log*"
+        "avm-nginx_access_log-*"
     ],
- "settings": {
+    "settings": {
         "number_of_shards": 3
-    }
-
+    },
+    "mappings": {
+        "_doc": {
+            "_source": {
+                "enabled": false
+            }
+     }
+  }
 }
-
-

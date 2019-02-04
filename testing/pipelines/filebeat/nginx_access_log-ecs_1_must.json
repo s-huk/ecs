@@ -1,9 +1,6 @@
 {
   "@timestamp": "2019-01-29T09:04:18.000Z",
   "@version": "1",
-  "avm": {
-    "host": "download1"
-  },
   "client": {
     "geo": {
       "city_name": "Secaucus",
@@ -23,6 +20,9 @@
   "geo": {
 
   },
+  "host": {
+    "hostname": "download1"
+  },
   "http": {
     "request": {
       "method": "GET",
@@ -34,7 +34,6 @@
     },
     "version": "1.1"
   },
-  "read_timestamp": "2019-01-29T09:04:19.175Z",
   "tags": [
     "beats_input_codec_plain_applied"
   ],
