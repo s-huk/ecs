@@ -71,8 +71,8 @@ def flatten_json(y):
         if type(x) is dict:
             for a in x:
                 flatten(x[a], name + a + '.')
-        else:
-            out[name[:-1]] = x
+#        else:
+        out[name[:-1]] = x
     flatten(y)
     return out
 
@@ -357,13 +357,8 @@ if argvars["action"] == "gen-doc":
         avm_must[p] = {}
         for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
             with open(  json_path, 'r') as must_file:
-                avm_must[p].update( flatten_json(  json.loads( withdraw_comments(must_file) )  ) )
+                deep_update(avm_must[p], flatten_json(json.loads(withdraw_comments(must_file))), conflict_action="override")
     
-    avmmust_flat = list(set([a for p in list(avm_must.keys()) for a in avm_must[p]]))
-    #mapping.nav
-    #orphaned = [{"name":f, "type":"", "description":""} for f in avmmust_flat if f not in mapping.nav ]
-    #print (orphaned)
-
     beats = {}
     for beat in [os.path.basename(os.path.dirname(f)) for f in avm_pipelines]:
         beats[beat] = beats.get(beat, 0) + 1
@@ -373,7 +368,7 @@ if argvars["action"] == "gen-doc":
     nslist = sorted(  list(ns_key_map.keys())  )
     nslist.remove("base")
     nslist.remove("avm")
-    #for ns in sorted( list(ns_key_map.keys()) ):
+    
     for ns in ["base"] + nslist + ["avm"]:
         output += '<tr><th rowspan=2><span title="'+mapping.navigate(ns).get("description", "")+'"><h4>'+str(ns)+'</h4></span></th>'+''.join(['<td colspan='+str(beats[b])+' align="center">'+str(b)+'</td>' for b in sorted(beats.keys())])+'</tr>'
         output += '<tr>'+''.join(['<td align="center"><span title="'+p+'">'+os.path.basename(p)[:2]+'</span></td>' for p in avm_pipelines])+'</tr>'
@@ -395,12 +390,17 @@ if argvars["action"] == "gen-doc":
 
             str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
             output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
+            
+            # remove paths k which are nested in the current object's path
+            for f in avm_pipelines:
+                for d in [k for k in avm_must[f] if path in avm_must[f] and not path == k and k[:len(path)] == path]:
+                    avm_must[f].pop(d)
     
     # ORPHANED FIELDS
     output += '<tr><th rowspan=2><span title=""><h4>orphaned</h4></span></th>'+''.join(['<td colspan='+str(beats[b])+' align="center">'+str(b)+'</td>' for b in sorted(beats.keys())])+'</tr>'
     output += '<tr>'+''.join(['<td align="center"><span title="'+p+'">'+os.path.basename(p)[:2]+'</span></td>' for p in avm_pipelines])+'</tr>'
     
-    for path in sorted(list(set([i for f in avm_pipelines for i in avm_must[f] if not mapping.amend_path(i, error_non_existing=False)]))):
+    for path in sorted(list(set([i for f in avm_pipelines for i in avm_must[f] if not mapping.amend_path(i, error_non_existing=False) and not type(avm_must[f][i]) is dict]))):
         show_name = '<span title="()">'+path+'</span>'
         str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
         output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
@@ -440,7 +440,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         avm_must[p] = {}
         for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
             with open(  json_path, 'r') as must_file:
-                avm_must[p].update( flatten_json(  json.loads( withdraw_comments(must_file) )  ) )
+                deep_update(avm_must[p], flatten_json(json.loads(withdraw_comments(must_file))), conflict_action="override")
         
         print ()
         print ("#############################################################")
@@ -475,13 +475,16 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                 show_name = path +' ['+field["type"]+']'
                 output += '#        '+show_name+': '+str(avm_must[p][path]) +'\n' if path in avm_must[p] else ""
                 
+                # remove paths k which are nested in the current object's path
+                for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path]:
+                    avm_must[p].pop(d)
         
         # ORPHANED FIELDS
         output += '#    orphaned'+'\n'
-        for path in sorted(list(set([i for i in avm_must[p] if not mapping.amend_path(i, error_non_existing=False)]))):
+        for path in sorted(list(set([i for i in avm_must[p] if not mapping.amend_path(i, error_non_existing=False) and not type(avm_must[p][i]) is dict]))):
             show_name = path +' [?]'
             output += '#        '+show_name+': '+str(avm_must[p][path]) +'\n' if path in avm_must[p] else ""
-                
+            
         print( output+"\n" )
         #
         # end: print schema
@@ -490,7 +493,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
 
         # create auto-generated template => gen_template
         avmmust_flat = list(set([a for a in avm_must[p]]))
-        gen_template = mapping.collate_template(avmmust_flat)  # mapping.collate_mapping(avmmust_flat)
+        gen_template = mapping.collate_template(avmmust_flat)
 
         # override standard template json with auto-generated template => result
         f_std_template = open(root_dir+"standard-template.json", 'r')
@@ -538,7 +541,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                     print("#    INDEX "+index_prefix+"-1 ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
                     exit()
             else:
-                print("Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1")
+                print("Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1  "+resp.status_code+" "+resp.content)
                 exit()
             
             # ALIAS CREATION
@@ -553,13 +556,11 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                     print("#    ALIAS "+index_prefix+" ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
                     exit()
             else:
-                print("Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.text)
+                print("Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.content)
                 exit()
 
     
     if argvars["action"] == "submit-template":
         print("\nAktion wurde durchgeführt.\n")
         
-    #avmmust_flat = list(set([p for k in list(avm_must.keys()) for p in avm_must[k] ])) 
-
 
