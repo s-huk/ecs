@@ -542,7 +542,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                 exit()
             
             # ALIAS CREATION
-            resp = requests.head(argvars["cluster"]+'/_aliases/'+index_prefix)
+            resp = requests.head(argvars["cluster"]+'/_alias/'+index_prefix)
             if resp.status_code == 200:
                 print( "#    ALIAS EXISTIERT BEREITS" )
             elif resp.status_code == 404:
@@ -553,7 +553,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                     print("#    ALIAS "+index_prefix+" ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
                     exit()
             else:
-                print("Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix)
+                print("Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.text)
                 exit()
 
     
