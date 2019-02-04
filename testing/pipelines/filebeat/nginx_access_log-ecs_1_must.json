@@ -5,7 +5,23 @@
     "host": "download1"
   },
   "client": {
-    "ip": "79.235.32.121"
+    "geo": {
+      "city_name": "Secaucus",
+      "country_iso_code": "US",
+      "country_name": "United States",
+      "location": {
+        "lat": 40.7801,
+        "lon": -74.0633
+      },
+      "region_name": "New Jersey"
+    },
+    "ip": "66.45.249.218"
+  },
+  "fields": {
+    "service_type": "http-download"
+  },
+  "geo": {
+
   },
   "http": {
     "request": {
@@ -17,9 +33,6 @@
       "status_code": "200"
     },
     "version": "1.1"
-  },
-  "fields": {
-    "service_type": "http-download"
   },
   "read_timestamp": "2019-01-29T09:04:19.175Z",
   "tags": [
@@ -42,3 +55,4 @@
     "os_name": "Other"
   }
 }
+
