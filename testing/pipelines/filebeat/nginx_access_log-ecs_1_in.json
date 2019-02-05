@@ -1,17 +1,17 @@
 {
-  "@timestamp": "2019-02-05T15:46:59.253Z",
+  "@timestamp": "2019-02-05T15:58:59.687Z",
   "@version": "1",
   "app_name": "http-download",
   "beat": {
-    "hostname": "download3",
-    "name": "download3",
+    "hostname": "download2",
+    "name": "download2",
     "version": "5.6.14"
   },
-  "host": "download3",
+  "host": "download2",
   "input_type": "log",
   "log_type": "nginx",
-  "message": "217.94.98.150 - - [05/Feb/2019:16:46:58 +0100] \"GET /tv/logos/swr_hd.png HTTP/1.1\" 200 6166 \"http://download.avm.de/tv/tv1.html\" \"Mozilla/5.0 (Windows NT 6.1; rv:65.0) Gecko/20100101 Firefox/65.0\"",
-  "offset": 20700152,
+  "message": "88.75.170.17 - - [05/Feb/2019:16:58:59 +0100] \"GET /archive/cardware/fritzcrd.pci/ HTTP/1.1\" 200 2290 \"https://avm.de/service/weitere-produkte/fritzcard-pci/wissensdatenbank/publication/show/367_Aktuellen-CAPI2-0-Treiber-installieren-Treiber-Update/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0\"",
+  "offset": 23130242,
   "source": "/var/log/nginx/access.log",
   "tags": [
     "beats_input_codec_plain_applied"
