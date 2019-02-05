@@ -17,9 +17,6 @@
   "fields": {
     "service_type": "http-download"
   },
-  "geo": {
-
-  },
   "host": {
     "hostname": "download1"
   },
@@ -54,4 +51,3 @@
     "os_name": "Other"
   }
 }
-
