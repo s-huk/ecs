@@ -1,0 +1,56 @@
+{
+  "@timestamp": "2019-02-05T15:58:59.000Z",
+  "@version": "1",
+  "client": {
+    "geo": {
+      "city_name": "Markranstadt",
+      "country_iso_code": "DE",
+      "country_name": "Germany",
+      "location": {
+        "lat": 51.3,
+        "lon": 12.2333
+      },
+      "region_name": "Saxony"
+    },
+    "ip": "88.75.170.17"
+  },
+  "fields": {
+    "service_type": "http-download"
+  },
+  "host": {
+    "hostname": "download2"
+  },
+  "http": {
+    "request": {
+      "method": "GET",
+      "referrer": "https://avm.de/service/weitere-produkte/fritzcard-pci/wissensdatenbank/publication/show/367_Aktuellen-CAPI2-0-Treiber-installieren-Treiber-Update/"
+    },
+    "response": {
+      "bytes": "2290",
+      "status_code": "200"
+    },
+    "version": "1.1"
+  },
+  "tags": [
+    "beats_input_codec_plain_applied"
+  ],
+  "url": {
+    "original": "/archive/cardware/fritzcrd.pci/"
+  },
+  "user": {
+    "name": "-"
+  },
+  "user_agent": {
+    "build": "",
+    "device": {
+      "name": "Other"
+    },
+    "name": "Firefox",
+    "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0",
+    "os": {
+      "name": "Windows"
+    },
+    "version": "65"
+  }
+}
+
