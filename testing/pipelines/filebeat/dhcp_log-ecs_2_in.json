@@ -1,0 +1,31 @@
+{
+  "@metadata": {
+    "beat": "filebeat",
+    "topic": "ops_filebeat",
+    "type": "doc",
+    "version": "6.5.4"
+  },
+  "@timestamp": "2019-02-09T13:13:16.121Z",
+  "beat": {
+    "hostname": "dhcp-sv-01",
+    "name": "dhcp-sv-01",
+    "version": "6.5.4"
+  },
+  "fields": {
+    "service_type": "dhcp",
+    "topic": "ops_filebeat"
+  },
+  "host": {
+    "name": "dhcp-sv-01"
+  },
+  "input": {
+    "type": "log"
+  },
+  "message": "Feb  9 14:13:15 dhcp-sv-01 dhcpd[27869]: DHCPINFORM from 172.17.16.187 via 172.17.16.1",
+  "offset": 400281,
+  "prospector": {
+    "type": "log"
+  },
+  "source": "/var/log/dhcpd.log"
+}
+

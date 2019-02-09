@@ -1,0 +1,31 @@
+{
+  "@metadata": {
+    "beat": "filebeat",
+    "topic": "ops_filebeat",
+    "type": "doc",
+    "version": "6.5.4"
+  },
+  "@timestamp": "2019-02-09T13:13:53.124Z",
+  "beat": {
+    "hostname": "dhcp-sv-01",
+    "name": "dhcp-sv-01",
+    "version": "6.5.4"
+  },
+  "fields": {
+    "service_type": "dhcp",
+    "topic": "ops_filebeat"
+  },
+  "host": {
+    "name": "dhcp-sv-01"
+  },
+  "input": {
+    "type": "log"
+  },
+  "message": "Feb  9 14:13:52 dhcp-sv-01 dhcpd[27869]: DHCPREQUEST for 172.16.126.101 (172.16.0.233) from 04:5d:4b:50:fd:0e (android-e076a768f09e2046) via 172.16.1.1",
+  "offset": 401794,
+  "prospector": {
+    "type": "log"
+  },
+  "source": "/var/log/dhcpd.log"
+}
+

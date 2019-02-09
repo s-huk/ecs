@@ -49,15 +49,4 @@ fields:
         fields:
           - name: status_code
             type: keyword
-########################################
-# user_agent extension:
-########################################
-  - name: user_agent
-    fields:
-      - name: os
-        type: keyword
-      - name: os_name
-        type: keyword
-      - name: build
-        type: keyword
 

@@ -1,0 +1,13 @@
+ECSDHCPD_VIA via (%{IP:dhcp_relay_ip}|(?<dhcp_device>[^: ]+))
+
+ECSDHCPD_OPERATION DHCP(%{ECSDHCPD_DISCOVER}|%{ECSDHCPD_OFFER_ACK}|%{ECSDHCPD_INFORM_ACK}|%{ECSDHCPD_REQUEST}|%{ECSDHCPD_DECLINE}|%{ECSDHCPD_RELEASE}|%{ECSDHCPD_INFORM}|%{ECSDHCPD_LEASE})(: %{GREEDYDATA:dhcpd_message})?
+ECSDHCPD_DISCOVER (?<dhcp_operation>DISCOVER) from %{MAC:dhcp_client_mac}( \(%{DATA:dhcp_client_name}\))? %{ECSDHCPD_VIA}
+ECSDHCPD_OFFER_ACK (?<dhcp_operation>(OFFER|N?ACK)) on %{IP:dhcp_client_ip} to %{MAC:dhcp_client_mac}( \(%{DATA:dhcp_client_name}\))? %{ECSDHCPD_VIA}
+ECSDHCPD_INFORM_ACK (?<dhcp_operation>(OFFER|N?ACK)) to %{IP:dhcp_client_ip} ?\(%{MAC:dhcp_client_mac}?\)( \(%{DATA:dhcp_client_name}\))? %{ECSDHCPD_VIA}
+ECSDHCPD_REQUEST (?<dhcp_operation>REQUEST) for %{IP:dhcp_client_ip}( \(%{DATA:dhcp_server_ip}\))? from %{MAC:dhcp_client_mac}( \(%{DATA:dhcp_client_name}\))? %{ECSDHCPD_VIA}
+ECSDHCPD_DECLINE (?<dhcp_operation>DECLINE) of %{IP:dhcp_client_ip} from %{MAC:dhcp_client_mac}( \(%{DATA:dhcp_client_name}\))? %{ECSDHCPD_VIA}
+ECSDHCPD_RELEASE (?<dhcp_operation>RELEASE) of %{IP:dhcp_client_ip} from %{MAC:dhcp_client_mac}( \(%{DATA:dhcp_client_name}\))? %{ECSDHCPD_VIA} \((?<dhcpd_release>(not )?found)\)
+ECSDHCPD_INFORM (?<dhcp_operation>INFORM) from %{IP:dhcp_client_ip}? %{ECSDHCPD_VIA}
+ECSDHCPD_LEASE (?<dhcp_operation>LEASE(QUERY|UNKNOWN|ACTIVE|UNASSIGNED)) (from|to) %{IP:dhcp_client_ip} for (IP %{IP:dhcp_leasequery_ip}|client-id %{NOTSPACE:dhcp_leasequery_id}|MAC address %{MAC:dhcp_leasequery_mac})( \(%{NUMBER:dhcp_leasequery_associated} associated IPs\))?
+
+ECSDHCPD %{ECSDHCPD_OPERATION}

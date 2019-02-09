@@ -1,0 +1,31 @@
+{
+  "@metadata": {
+    "beat": "filebeat",
+    "topic": "ops_filebeat",
+    "type": "doc",
+    "version": "6.5.4"
+  },
+  "@timestamp": "2019-02-09T13:11:56.113Z",
+  "beat": {
+    "hostname": "dhcp-sv-01",
+    "name": "dhcp-sv-01",
+    "version": "6.5.4"
+  },
+  "fields": {
+    "service_type": "dhcp",
+    "topic": "ops_filebeat"
+  },
+  "host": {
+    "name": "dhcp-sv-01"
+  },
+  "input": {
+    "type": "log"
+  },
+  "message": "Feb  9 14:11:49 dhcp-sv-01 dhcpd[27869]: DHCPACK to 172.17.16.171 (6c:3b:e5:2b:b5:a3) via eth0",
+  "offset": 399663,
+  "prospector": {
+    "type": "log"
+  },
+  "source": "/var/log/dhcpd.log"
+}
+
