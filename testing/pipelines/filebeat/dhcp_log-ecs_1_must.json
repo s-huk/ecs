@@ -1,0 +1,20 @@
+{
+  "@timestamp": "2019-02-09T13:11:56.113Z",
+  "@version": "1",
+  "avm": {
+    "dhcpd": {
+      "operation": "ACK"
+    }
+  },
+  "client": {
+    "ip": "172.17.16.171",
+    "mac": "6c:3b:e5:2b:b5:a3"
+  },
+  "fields": {
+    "service_type": "dhcp_log"
+  },
+  "host": {
+    "name": "dhcp-sv-01"
+  }
+}
+

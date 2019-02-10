@@ -1,0 +1,16 @@
+{
+    "index_patterns": [
+        "dhcp_log-ecs*"
+    ],
+    "settings": {
+        "number_of_shards": 3
+    },
+    "mappings": {
+        "_doc": {
+            "_source": {
+                "enabled": true
+            }
+     }
+  }
+}
+
