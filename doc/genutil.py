@@ -516,9 +516,9 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         print ()
         
         if argvars["action"] == "submit-template":
-            if not "index_patterns" in result or not isinstance(result["index_patterns"], list) or not len(result["index_patterns"]) == 1 or not result["index_patterns"][0].endswith("*"):
-                print("Die Vorgabe des Index-Patterns ist individuell-uneindeutig. Daher wird die automatische Übermittlung von Template-, Index- und Alias-Daten nicht durchgeführt. ")
-                exit()
+            if not "index_patterns" in result or not isinstance(result["index_patterns"], list) or [i for i in range(len(result["index_patterns"])) if not isinstance(result["index_patterns"][i], str) or not result["index_patterns"][i].endswith("*") or "*" in result["index_patterns"][i][:-1]]:
+                print("ACHTUNG: Die Vorgabe der Index-Patterns "+str(result["index_patterns"])+" in Pipeline "+p+" ist individuell-uneindeutig. Daher wird die automatische Übermittlung von Template-, Index- und Alias-Daten nicht durchgeführt. ")
+                continue
             
             # TEMPLATE CREATION
             resp = requests.put(argvars["cluster"]+'/_template/'+templateName, json=result)
@@ -528,36 +528,37 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                 print("#    TEMPLATE "+templateName+" AKTUALISIERUNG FEHLGESCHLAGEN: " + str(resp.content) )
                 exit()
             
-            # INDEX CREATION
-            index_prefix = result["index_patterns"][0][:-2] if result["index_patterns"][0][-2:] == "-*" else result["index_patterns"][0][:-1]
-            resp = requests.head(argvars["cluster"]+'/'+index_prefix+'-1')
-            if resp.status_code == 200:
-                print( "#    INDEX EXISTIERT BEREITS" )
-            elif resp.status_code == 404:
-                resp = requests.put(argvars["cluster"]+'/'+index_prefix+'-1')
+            for curPattern in result["index_patterns"]:
+                # INDEX CREATION
+                index_prefix = curPattern[:-2] if curPattern[-2:] == "-*" else curPattern[:-1]
+                resp = requests.head(argvars["cluster"]+'/'+index_prefix+'-1')
                 if resp.status_code == 200:
-                    print( "#    INDEX "+index_prefix+"-1 ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
+                    print( "#    INDEX EXISTIERT BEREITS UND WIRD UEBERSPRUNGEN: " + index_prefix )
+                elif resp.status_code == 404:
+                    resp = requests.put(argvars["cluster"]+'/'+index_prefix+'-1')
+                    if resp.status_code == 200:
+                        print( "#    INDEX "+index_prefix+"-1 ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
+                    else:
+                        print("#    INDEX "+index_prefix+"-1 ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                        exit()
                 else:
-                    print("#    INDEX "+index_prefix+"-1 ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                    print("Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1  "+resp.status_code+" "+resp.content)
                     exit()
-            else:
-                print("Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1  "+resp.status_code+" "+resp.content)
-                exit()
-            
-            # ALIAS CREATION
-            resp = requests.head(argvars["cluster"]+'/_alias/'+index_prefix)
-            if resp.status_code == 200:
-                print( "#    ALIAS EXISTIERT BEREITS" )
-            elif resp.status_code == 404:
-                resp = requests.post(argvars["cluster"]+'/_aliases', json={"actions":[{"add":{"index":index_prefix+'-1',"alias":index_prefix}}]})
+                
+                # ALIAS CREATION
+                resp = requests.head(argvars["cluster"]+'/_alias/'+index_prefix)
                 if resp.status_code == 200:
-                    print( "#    ALIAS "+index_prefix+" ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
+                    print( "#    ALIAS EXISTIERT BEREITS UND WIRD UEBERSPRUNGEN: " + index_prefix )
+                elif resp.status_code == 404:
+                    resp = requests.post(argvars["cluster"]+'/_aliases', json={"actions":[{"add":{"index":index_prefix+'-1',"alias":index_prefix}}]})
+                    if resp.status_code == 200:
+                        print( "#    ALIAS "+index_prefix+" ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
+                    else:
+                        print("#    ALIAS "+index_prefix+" ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                        exit()
                 else:
-                    print("#    ALIAS "+index_prefix+" ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                    print("Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.content)
                     exit()
-            else:
-                print("Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.content)
-                exit()
 
     
     if argvars["action"] == "submit-template":
