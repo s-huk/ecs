@@ -1,0 +1,10 @@
+{
+    "processors" : [
+        {
+            "remove" : {
+                "ignore_missing" : true,
+                "field" : "trash"
+            }
+        }
+    ]
+}

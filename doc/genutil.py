@@ -422,7 +422,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
    
     if argvars["action"] == "submit-template":
         yes_no = input("\nSollen die oben stehenden Templates wirklich an den Server " + argvars["cluster"] + " geschickt werden? [y/N] ")
-        if yes_no == '' or yes_no[0].lower().strip() != 'y':
+        if yes_no == '' or not yes_no[0].lower().strip() in ['y', 'j']:
             print("\nAktion wurde nicht durchgeführt.\n")
             exit()
 #        if argvars["user"] is None:
@@ -434,6 +434,14 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
 #        passwd = getpass.getpass("\nPasswort: ")
 #        if passwd == '':
 #            print("\nProbleme bei der Passworteingabe. Aktion abgebrochen.\n")
+        
+        with open(  root_dir+'avm_elop_default_ingest_pipeline.json', 'r') as pipe_file:
+            resp = requests.put(argvars["cluster"]+'/_ingest/pipeline/avm_elop_default_ingest_pipeline', json=json.load(pipe_file))
+            if resp.status_code == 200:
+                print("#    Default-Pipeline avm_elop_default_ingest_pipeline ERFOLGREICH UEBERTRAGEN: "+ str(resp.content))
+            else:
+                print("**FEHLER BEI DER INITIALEN UEBERTRAGUNG der Default-Pipeline 'avm_elop_default_ingest_pipeline': " + str(resp.content) )
+                exit()
     
     avm_must = {}
     for p in avm_pipelines:
@@ -517,7 +525,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         
         if argvars["action"] == "submit-template":
             if not "index_patterns" in result or not isinstance(result["index_patterns"], list) or [i for i in range(len(result["index_patterns"])) if not isinstance(result["index_patterns"][i], str) or not result["index_patterns"][i].endswith("*") or "*" in result["index_patterns"][i][:-1]]:
-                print("ACHTUNG: Die Vorgabe der Index-Patterns "+str(result["index_patterns"])+" in Pipeline "+p+" ist individuell-uneindeutig. Daher wird die automatische Übermittlung von Template-, Index- und Alias-Daten nicht durchgeführt. ")
+                print("**WARNUNG: Die Vorgabe der Index-Patterns "+str(result["index_patterns"])+" in Pipeline "+p+" fehlt oder ist zu individuell. Daher wurde hierfuer keine automatische Uebermittlung von Template-, Index- oder Alias-Daten durchgeführt.\n")
                 continue
             
             # TEMPLATE CREATION
@@ -533,7 +541,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                 index_prefix = curPattern[:-2] if curPattern[-2:] == "-*" else curPattern[:-1]
                 resp = requests.head(argvars["cluster"]+'/'+index_prefix+'-1')
                 if resp.status_code == 200:
-                    print( "#    INDEX EXISTIERT BEREITS UND WIRD UEBERSPRUNGEN: " + index_prefix )
+                    print( "#    INDEX "+index_prefix+"-1 EXISTIERT BEREITS UND WIRD UEBERSPRUNGEN.")
                 elif resp.status_code == 404:
                     resp = requests.put(argvars["cluster"]+'/'+index_prefix+'-1')
                     if resp.status_code == 200:
@@ -542,13 +550,13 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                         print("#    INDEX "+index_prefix+"-1 ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
                         exit()
                 else:
-                    print("Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1  "+resp.status_code+" "+resp.content)
+                    print("**FEHLER: Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1  "+resp.status_code+" "+resp.content)
                     exit()
                 
                 # ALIAS CREATION
                 resp = requests.head(argvars["cluster"]+'/_alias/'+index_prefix)
                 if resp.status_code == 200:
-                    print( "#    ALIAS EXISTIERT BEREITS UND WIRD UEBERSPRUNGEN: " + index_prefix )
+                    print( "#    ALIAS "+index_prefix+" EXISTIERT BEREITS UND WIRD UEBERSPRUNGEN.")
                 elif resp.status_code == 404:
                     resp = requests.post(argvars["cluster"]+'/_aliases', json={"actions":[{"add":{"index":index_prefix+'-1',"alias":index_prefix}}]})
                     if resp.status_code == 200:
@@ -557,11 +565,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                         print("#    ALIAS "+index_prefix+" ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
                         exit()
                 else:
-                    print("Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.content)
+                    print("**FEHLER: Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.content)
                     exit()
 
-    
-    if argvars["action"] == "submit-template":
-        print("\nAktion wurde durchgeführt.\n")
-        
 

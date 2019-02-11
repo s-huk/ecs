@@ -1,6 +1,7 @@
 {
   "settings": {
-    "number_of_shards": 1
+    "number_of_shards": 1,
+    "default_pipeline" : "avm_elop_default_pipeline"
   },
   "mappings": {
     "_doc": {
