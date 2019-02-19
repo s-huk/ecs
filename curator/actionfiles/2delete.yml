@@ -1,20 +1,6 @@
+---
 actions:
   1:
-    action: delete_indices
-    description: delete monitoring-*
-    options:
-      ignore_empty_list: True
-      disable_action: False
-    filters:
-    - filtertype: pattern
-      kind: prefix
-      value: .monitoring-
-    - filtertype: age
-      source: creation_date
-      direction: older
-      unit: days
-      unit_count: 3
-  2:
     action: delete_indices
     description: delete winlogbeat-*
     options:
@@ -29,16 +15,31 @@ actions:
       direction: older
       unit: days
       unit_count: 30
-  3:
+  2:
     action: delete_indices
-    description: delete *-download-*
+    description: delete nginx_access_log-ecs-http-download-*
     options:
       ignore_empty_list: True
       disable_action: False
     filters:
     - filtertype: pattern
-      kind: regex
-      value: '.*download.*'
+      kind: prefix
+      value: nginx_access_log-ecs-http-download-
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: days
+      unit_count: 8
+  3:
+    action: delete_indices
+    description: delete filebeat-ftp-download-*
+    options:
+      ignore_empty_list: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: filebeat-ftp-download-
     - filtertype: age
       source: creation_date
       direction: older
@@ -61,6 +62,21 @@ actions:
       unit_count: 4
   5:
     action: delete_indices
+    description: delete metricbeat-haproxy_stats-*
+    options:
+      ignore_empty_list: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: metricbeat-haproxy_stats-
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: days
+      unit_count: 21
+  6:
+    action: delete_indices
     description: delete filebeat-auth_log-*
     options:
       ignore_empty_list: True
@@ -74,7 +90,7 @@ actions:
       direction: older
       unit: months
       unit_count: 3
-  6:
+  7:
     action: delete_indices
     description: delete packetbeat-*
     options:
@@ -89,22 +105,22 @@ actions:
       direction: older
       unit: days
       unit_count: 8
-  7:
+  8:
     action: delete_indices
-    description: delete metricbeat-haproxy_stats-*
+    description: delete avm-paloalto-pa_threat-*
     options:
       ignore_empty_list: True
       disable_action: False
     filters:
     - filtertype: pattern
       kind: prefix
-      value: metricbeat-haproxy_stats-
+      value: avm-paloalto-pa_threat-
     - filtertype: age
       source: creation_date
       direction: older
       unit: days
-      unit_count: 21
-  8:
+      unit_count: 90
+  9:
     action: delete_indices
     description: delete avm-paloalto-pa_traffic-*
     options:
@@ -120,18 +136,3 @@ actions:
       timestring: '%Y.%m.%d'
       unit: days
       unit_count: 4
-  9:
-    action: delete_indices
-    description: delete avm-paloalto-pa_threat-*
-    options:
-      ignore_empty_list: True
-      disable_action: False
-    filters:
-    - filtertype: pattern
-      kind: prefix
-      value: avm-paloalto-pa_threat-
-    - filtertype: age
-      source: creation_date
-      direction: older
-      unit: days
-      unit_count: 90
