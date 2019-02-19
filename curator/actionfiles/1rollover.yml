@@ -1,30 +1,6 @@
 ---
-# Remember, leave a key empty if there is no value.  None will be a string,
-# not a Python "NoneType"
-#
-# Also remember that all examples have 'disable_action' set to True.  If you
-# want to use this action as a template, be sure to set this to False after
-# copying it.
 actions:
   1:
-    action: rollover
-    description: filebeat-haproxy_access_log Rollover
-    options:
-      name: filebeat-haproxy_access_log
-      conditions:
-        max_age: 3d
-        #max_docs: 5000
-        max_size: 30gb
-  2:
-    action: rollover
-    description: Packetbeat Rollover
-    options:
-      name: packetbeat
-      conditions:
-        max_age: 7d
-        #max_docs: 5000
-        max_size: 40gb
-  3:
     action: rollover
     description: Winlogbeat Rollover
     options:
@@ -33,16 +9,16 @@ actions:
         max_age: 30d
         #max_docs: 5000
         max_size: 40gb
-  4:
+  2:
     action: rollover
-    description: filebeat-http-download Rollover
+    description: nginx_access_log-ecs-http-download Rollover
     options:
-      name: filebeat-http-download
+      name: nginx_access_log-ecs-http-download
       conditions:
         max_age: 7d
         #max_docs: 5000
         max_size: 40gb
-  5:
+  3:
     action: rollover
     description: filebeat-ftp-download Rollover
     options:
@@ -51,7 +27,16 @@ actions:
         max_age: 7d
         #max_docs: 5000
         max_size: 40gb
-  6:
+  4:
+    action: rollover
+    description: filebeat-haproxy_access_log Rollover
+    options:
+      name: filebeat-haproxy_access_log
+      conditions:
+        max_age: 3d
+        #max_docs: 5000
+        max_size: 30gb
+  5:
     action: rollover
     description: metricbeat-haproxy_stats Rollover
     options:
@@ -60,13 +45,22 @@ actions:
         max_age: 7d
         #max_docs: 5000
         max_size: 40gb
-  7:
+  6:
     action: rollover
     description:  filebeat-auth_log Rollover
     options:
       name: filebeat-auth_log
       conditions:
         max_age: 30d
+        #max_docs: 5000
+        max_size: 40gb
+  7:
+    action: rollover
+    description: Packetbeat Rollover
+    options:
+      name: packetbeat
+      conditions:
+        max_age: 7d
         #max_docs: 5000
         max_size: 40gb
   8:
@@ -77,4 +71,4 @@ actions:
       conditions:
         max_age: 30d
         #max_docs: 5000
-        max_size: 40gb        
+        max_size: 40gb
