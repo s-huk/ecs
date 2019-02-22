@@ -243,7 +243,7 @@ class Mapping:
 
     def collate_template(self, paths):
         result = self.collate_mapping(paths)
-        return {"mappings":{"doc":result}}
+        return {"mappings":{"_doc":result}}
 
     def print(self):
         print( json.dumps(self.mapping, indent=4, sort_keys=True) )
