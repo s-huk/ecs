@@ -4,6 +4,7 @@
     "buildnumber": 61760,
     "buildtype": 1,
     "fw": "07.01",
+    "fw_original": "149.07.1",
     "hardware_id": 221,
     "maca": "7CFF4DAFE9CE",
     "major": 149,
@@ -15,7 +16,9 @@
   },
   "avm_firmware_update_report": {
     "end": "1970-01-01T00:30:39Z",
-    "from_version_lit": "149.06.92,foo123",
+    "from_version": {
+      "original": "149.06.92,foo123"
+    },
     "initiator": "192.168.178.20",
     "initiator_hostname": "",
     "initiator_network": "",
@@ -26,7 +29,9 @@
     "reboot_reason": "update",
     "start": "1970-01-01T00:01:41Z",
     "success": true,
-    "to_version_lit": "149.07.01,456bar"
+    "to_version": {
+      "original": "149.07.01,456bar"
+    }
   },
   "source": {
     "address": "89.182.228.254",
@@ -41,8 +46,10 @@
       },
       "region_name": "Lower Saxony"
     },
-    "ip": "89.182.228.254",
-    "network": "HTP-DYN-DSL"
+    "ip": "89.182.228.254"
+  },
+  "network": {
+    "name": "HTP-DYN-DSL"
   },
   "tags": [
     "_grokparsefailure"

@@ -72,3 +72,12 @@ actions:
         max_age: 30d
         #max_docs: 5000
         max_size: 40gb
+  9:
+    action: rollover
+    description:  avm-reporting-backend-service-fw-reports Rollover
+    options:
+      name: avm-reporting-backend-service-fw-reports
+      conditions:
+        max_age: 30d
+        #max_docs: 5000
+        max_size: 40gb
