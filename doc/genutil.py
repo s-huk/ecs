@@ -2,8 +2,8 @@
 import argparse
 import os
 import sys
-import yaml 
-import glob 
+import yaml
+import glob
 import json
 import re
 import getpass
@@ -35,7 +35,7 @@ print()
 if argvars["action"] == "gen-doc" and argvars["pipelines"] != "pipelines/*/*.conf":
     print("ignoring argument -p " + argvars["pipelines"])
     argvars["pipelines"] = "pipelines/*/*.conf"
-    
+
 avm_pipelines = [ m[len(root_dir):-5] for p in argvars["pipelines"].split(",") for m in glob.glob(root_dir+p) if os.path.isfile(m) and m[-5:]==".conf" ]
 avm_pipelines.sort()
 print (" => "+"\n => ".join(avm_pipelines))
@@ -81,7 +81,7 @@ def flatten_json(y):
 def deep_update(d, inset, conflict_action):
     def deep_update(d, inset, conflict_action, str_path):
         for k in inset.keys():
-            if not k in d: 
+            if not k in d:
                 d.update({k:inset[k]})
             else:
                 if isinstance(inset[k], dict):
@@ -112,7 +112,7 @@ def conv_fields_to_dict(o):
         elif len(arr) == 1:
             return {arr[0]:o}
         return {}
-    
+
     f = o.copy()
     if isinstance(f, dict) and "fields" in f:
         f["properties"] = conv_fields_to_dict(f["fields"])
@@ -124,7 +124,7 @@ def conv_fields_to_dict(o):
         for k in f:
             if "name" in k:
                 deep_update(result, namesplit( k["name"].split("."), conv_fields_to_dict(pop_name(k.copy())) ), conflict_action="error")
-            
+
         return result
     else:
         return f
@@ -170,31 +170,31 @@ class Mapping:
                 return ['base']+path
             if error_non_existing:
                 raise Exception("Path not found: " + str(path))
-        
+
     # gathers all settings of a given path - on every depth of the path
     def accumulate(self, path):
         def ping(mapping, path):
             result = {k:v for (k,v) in mapping.items() if k!="properties" and k!="fields" }
-            
+
             if path != []:
                 for fieldkey in ["properties", "fields"]:
                     if fieldkey in mapping and path[0] in mapping[fieldkey]:
                         result.update( {fieldkey: pong(mapping[fieldkey], path)} )
                         return result
                 return pong(mapping, path)
-            
+
             return result
-        
+
         def pong(mapping, path):
             if path[0] in mapping:
                 return {path[0]: ping(mapping[path[0]], path[1:])}
 #            elif path[0] in mapping.get('base', {"properties": None})["properties"]:
 #                return {path[0]: ping(mapping["base"]["properties"][path[0]], path[1:])}
             raise Exception("Path not found: " + str(path) + "   " + str(mapping["properties"].keys()))
-        
+
         return ping(self.mapping, self.amend_path(path, error_non_existing=True))
 
-    
+
     # navigates to a specific path and returns the resulting dict
     def navigate(self, path):
         def ping(mapping, path):
@@ -208,7 +208,7 @@ class Mapping:
             if path[0] in mapping:
                 return ping(mapping[path[0]], path[1:])
             raise Exception("Path not found: " + str(path))
-        
+
         return ping(self.mapping, self.amend_path(path, error_non_existing=True))
 
 
@@ -218,7 +218,7 @@ class Mapping:
         for k, v in self.nav.items():
             result[v[0]] = result.get(v[0], [])
             result[v[0]].append(k)
-        
+
         return result
 
     def collate_mapping(self, paths):
@@ -228,22 +228,22 @@ class Mapping:
             p = self.amend_path(i, error_non_existing=False)
             if p:
                 deep_update(result, self.accumulate(p), conflict_action=None)
-#                print ("# found: " + i + "   " + str(p))                
+#                print ("# found: " + i + "   " + str(p))
 #                #deep_update(result, self.accumulate(p), conflict_action="error")
 #            else:
 #                print ("# WARNING: ignoring orphaned field which was not found in the avm/ecs schema: " + i)
 
         # relocate 'base' to root
-        if "properties" in result: 
+        if "properties" in result:
             if "base" in result["properties"]:
                 base = result["properties"].pop("base")
                 deep_update(result, base, "error")
-            
+
         return result
 
     def collate_template(self, paths):
         result = self.collate_mapping(paths)
-        return {"mappings":{"_doc":result}}
+        return {"mappings":{"doc":result}}
 
     def print(self):
         print( json.dumps(self.mapping, indent=4, sort_keys=True) )
@@ -270,7 +270,7 @@ def expand_ecs_fields_to_mapping(f):
         elif isinstance(f, list):
             for g in f:
                 expand_reusable_helper(g)
-    
+
     root = f.copy()
     expand_reusable_helper(root)
     result = [{k:v for (k,v) in d.items() if not k=="reusable"} for d in root if not "reusable" in d or ("top_level" in d["reusable"] and d["reusable"]["top_level"]==True)]
@@ -284,7 +284,7 @@ def strip_json_values(f):
         for key in f.keys():
             if isinstance(f[key], str):
                 f[key] = f[key].strip()
-            else: 
+            else:
                 strip_json_values(f[key])
     elif isinstance(f, list):
         for g in f:
@@ -330,7 +330,7 @@ with open(  root_dir+"/doc/ecs-extension.yml", 'r') as f_extension:
         deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="override")
 
 for path in sorted(glob.glob(root_dir+"doc/avm-schemas/*.yml")):
-    with open(path, 'r') as f:        
+    with open(path, 'r') as f:
         avmyml = yaml.load(f.read())
         if "fields" in avmyml:
             avmyml = avmyml["fields"]
@@ -351,14 +351,14 @@ mapping = Mapping(fields)
 if argvars["action"] == "gen-doc":
     def tr_bad_chars(s):
         return str(s).replace('"','').replace('[','').replace(']','').replace("\n", "   ")
-    
+
     avm_must = {}
     for p in avm_pipelines:
         avm_must[p] = {}
         for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
             with open(  json_path, 'r') as must_file:
                 deep_update(avm_must[p], flatten_json(json.loads(withdraw_comments(must_file))), conflict_action="override")
-    
+
     beats = {}
     for beat in [os.path.basename(os.path.dirname(f)) for f in avm_pipelines]:
         beats[beat] = beats.get(beat, 0) + 1
@@ -368,7 +368,7 @@ if argvars["action"] == "gen-doc":
     nslist = sorted(  list(ns_key_map.keys())  )
     nslist.remove("base")
     nslist.remove("avm")
-    
+
     for ns in ["base"] + nslist + ["avm"]:
         output += '<tr><th rowspan=2><span title="'+mapping.navigate(ns).get("description", "")+'"><h4>'+str(ns)+'</h4></span></th>'+''.join(['<td colspan='+str(beats[b])+' align="center">'+str(b)+'</td>' for b in sorted(beats.keys())])+'</tr>'
         output += '<tr>'+''.join(['<td align="center"><span title="'+p+'">'+os.path.basename(p)[:2]+'</span></td>' for p in avm_pipelines])+'</tr>'
@@ -376,13 +376,13 @@ if argvars["action"] == "gen-doc":
         #for field in sorted(namespace["fields"], key=lambda field: field["name"]):
         for path in sorted(ns_key_map[ns]):
             field = mapping.navigate(path)
-            
+
             if path.startswith("base."):
                 path = path[5:]
-            
+
             # Replace newlines with HTML representation as otherwise newlines don't work in Markdown
             description = str(field.get("description", "")).replace("\n", "<\br>").replace('"','').replace('[','').replace(']','')
-            
+
             if "example" in field:
                 show_name = '<span title="'+'('+field["type"]+') '+tr_bad_chars(field.get("description", ""))+'    EXAMPLE: '+tr_bad_chars(field.get("example",""))+'">'+path+'</span>'
             else:
@@ -390,27 +390,27 @@ if argvars["action"] == "gen-doc":
 
             str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
             output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
-            
+
             # remove paths k which are nested in the current object's path
             for f in avm_pipelines:
                 for d in [k for k in avm_must[f] if path in avm_must[f] and not path == k and k[:len(path)] == path]:
                     avm_must[f].pop(d)
-    
+
     # ORPHANED FIELDS
     output += '<tr><th rowspan=2><span title=""><h4>orphaned</h4></span></th>'+''.join(['<td colspan='+str(beats[b])+' align="center">'+str(b)+'</td>' for b in sorted(beats.keys())])+'</tr>'
     output += '<tr>'+''.join(['<td align="center"><span title="'+p+'">'+os.path.basename(p)[:2]+'</span></td>' for p in avm_pipelines])+'</tr>'
-    
+
     for path in sorted(list(set([i for f in avm_pipelines for i in avm_must[f] if not mapping.amend_path(i, error_non_existing=False) and not type(avm_must[f][i]) is dict]))):
         show_name = '<span title="()">'+path+'</span>'
         str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
         output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
-    
+
     output += "</tbody></table>"
     with open(root_dir+"README.md", "w") as readme:
         with open(root_dir+"INTRO.md", "r") as intro:
             readme.write(intro.read() + "\n\n## Felder\n")
         readme.write(output + "\n\n")
-    
+
     print( "\nDie README-Datei wurde aktualisiert.\n" )
 
 
@@ -419,7 +419,7 @@ if argvars["action"] == "gen-doc":
 ###################################################################################
 
 if argvars["action"] == "show" or argvars["action"] == "submit-template":
-   
+
     if argvars["action"] == "submit-template":
         yes_no = input("\nSollen die oben stehenden Templates wirklich an den Server " + argvars["cluster"] + " geschickt werden? [y/N] ")
         if yes_no == '' or not yes_no[0].lower().strip() in ['y', 'j']:
@@ -434,7 +434,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
 #        passwd = getpass.getpass("\nPasswort: ")
 #        if passwd == '':
 #            print("\nProbleme bei der Passworteingabe. Aktion abgebrochen.\n")
-        
+
         with open(  root_dir+'avm_elop_default_ingest_pipeline.json', 'r') as pipe_file:
             resp = requests.put(argvars["cluster"]+'/_ingest/pipeline/avm_elop_default_ingest_pipeline', json=json.load(pipe_file))
             if resp.status_code == 200:
@@ -442,20 +442,20 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
             else:
                 print("**FEHLER BEI DER INITIALEN UEBERTRAGUNG der Default-Pipeline 'avm_elop_default_ingest_pipeline': " + str(resp.content) )
                 exit()
-    
+
     avm_must = {}
     for p in avm_pipelines:
         avm_must[p] = {}
         for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
             with open(  json_path, 'r') as must_file:
                 deep_update(avm_must[p], flatten_json(json.loads(withdraw_comments(must_file))), conflict_action="override")
-        
+
         print ()
         print ("#############################################################")
         print ("# Pipeline: "+p+".conf")
         print ("#############################################################")
 #        if argvars["action"] == "show": # console doc summary
-        
+
         #
         # print schema
         #
@@ -474,25 +474,25 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
 
             for path in sorted(ns_key_map[ns]):
                 field = mapping.navigate(path)
-                
+
                 if path.startswith("base."):
                     path = path[5:]
-                
+
                 # str(field.get("example",""))
                 # str(field.get("description", ""))
                 show_name = path +' ['+field["type"]+']'
                 output += '#        '+show_name+': '+str(avm_must[p][path]) +'\n' if path in avm_must[p] else ""
-                
+
                 # remove paths k which are nested in the current object's path
                 for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path]:
                     avm_must[p].pop(d)
-        
+
         # ORPHANED FIELDS
         output += '#    orphaned'+'\n'
         for path in sorted(list(set([i for i in avm_must[p] if not mapping.amend_path(i, error_non_existing=False) and not type(avm_must[p][i]) is dict]))):
             show_name = path +' [?]'
             output += '#        '+show_name+': '+str(avm_must[p][path]) +'\n' if path in avm_must[p] else ""
-            
+
         print( output+"\n" )
         #
         # end: print schema
@@ -507,7 +507,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         f_std_template = open(root_dir+"standard-template.json", 'r')
         result = json.loads( withdraw_comments(f_std_template) )
         deep_update(result, gen_template, conflict_action="override")
-        
+
         # override generated template with information from pipeline-specific template json
         if os.path.isfile( root_dir+p+"-template.json" ):
             with open(root_dir+p+"-template.json", 'r') as f_template:
@@ -518,16 +518,16 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         templateName = p[10:].replace("/", "-")
         if not "index_patterns" in result:
             result.update({"index_patterns": [ "genutil-prototest-"+templateName+"-*" ]})
-        
+
         # output resulting es template
         print( json.dumps(result, indent=4, sort_keys=True) )
         print ()
-        
+
         if argvars["action"] == "submit-template":
             if not "index_patterns" in result or not isinstance(result["index_patterns"], list) or [i for i in range(len(result["index_patterns"])) if not isinstance(result["index_patterns"][i], str) or not result["index_patterns"][i].endswith("*") or "*" in result["index_patterns"][i][:-1]]:
                 print("**WARNUNG: Die Vorgabe der Index-Patterns "+str(result["index_patterns"])+" in Pipeline "+p+" fehlt oder ist zu individuell. Daher wurde hierfuer keine automatische Uebermittlung von Template-, Index- oder Alias-Daten durchgeführt.\n")
                 continue
-            
+
             # TEMPLATE CREATION
             resp = requests.put(argvars["cluster"]+'/_template/'+templateName, json=result)
             if resp.status_code == 200:
@@ -535,7 +535,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
             else:
                 print("#    TEMPLATE "+templateName+" AKTUALISIERUNG FEHLGESCHLAGEN: " + str(resp.content) )
                 exit()
-            
+
             for curPattern in result["index_patterns"]:
                 # INDEX CREATION
                 index_prefix = curPattern[:-2] if curPattern[-2:] == "-*" else curPattern[:-1]
@@ -552,7 +552,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                 else:
                     print("**FEHLER: Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1  "+resp.status_code+" "+resp.content)
                     exit()
-                
+
                 # ALIAS CREATION
                 resp = requests.head(argvars["cluster"]+'/_alias/'+index_prefix)
                 if resp.status_code == 200:
