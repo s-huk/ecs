@@ -6,7 +6,7 @@
         "number_of_shards": 3
     },
     "mappings": {
-        "_doc": {
+        "doc": {
             "_source": {
                 "enabled": true
             }
