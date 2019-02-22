@@ -1,5 +1,5 @@
 {
-  "index_patterns": [ "avm-fw-reports*" ],
+  "index_patterns": [ "avm-reporting-backend-service-fw-reports-*" ],
   "settings": {
     "number_of_shards": 1
   },

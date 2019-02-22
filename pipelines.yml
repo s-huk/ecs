@@ -9,7 +9,7 @@
 
 - pipeline.id: apache_access_log-ecs
   path.config: "/etc/logstash/avm-git/pipelines/filebeat/apache_access_log-ecs.conf"
-  
+
 - pipeline.id: nginx_access_log-ecs
   path.config: "/etc/logstash/avm-git/pipelines/filebeat/nginx_access_log-ecs.conf"
 
@@ -42,9 +42,13 @@
 
 - pipeline.id: paloalto_traffic
   path.config: "/etc/logstash/avm-git/pipelines/paloalto/paloalto_traffic-ecs.conf"
-  
+
 - pipeline.id: paloalto_threat
   path.config: "/etc/logstash/avm-git/pipelines/paloalto/paloalto_threat-ecs.conf"
+
+### Reporting Backend Service
+- pipeline.id: reporting-backend-service_fw-reports
+  path.config: "/etc/logstash/avm-git/pipelines/reporting-backend-service/fw-reports.conf"
 
 ### KAFKA INPUT ###
 
@@ -56,6 +60,11 @@
 
 - pipeline.id: packetbeat_input
   path.config: "/etc/logstash/avm-git/pipelines/packetbeat.conf"
-  
+
 - pipeline.id: paloalto_input
   path.config: "/etc/logstash/avm-git/pipelines/paloalto.conf"
+
+- pipeline.id: reporting-backend-service_input
+  path.config: "/etc/logstash/avm-git/pipelines/reporting-backend-service.conf"
+
+

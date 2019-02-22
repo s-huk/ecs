@@ -95,3 +95,7 @@ fields:
         type: keyword
         description: >
           The human-readable firmeware version of the FRITZ!OS executed on the AVM product.
+      - name: fw_original
+        type: keyword
+        description: >
+          The original firmeware version literal that was submitted by FRITZ!OS.

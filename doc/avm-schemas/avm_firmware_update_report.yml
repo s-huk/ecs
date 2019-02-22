@@ -44,6 +44,8 @@ fields:
             type: short
           - name: fw
             type: keyword
+          - name: original
+            type: keyword
       - name: to_version
         type: group
         fields:
@@ -56,4 +58,6 @@ fields:
           - name: patch
             type: short
           - name: fw
+            type: keyword
+          - name: original
             type: keyword
