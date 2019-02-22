@@ -4,9 +4,10 @@
     "default_pipeline" : "avm_elop_default_ingest_pipeline"
   },
   "mappings": {
-    "doc": {
+    "_doc": {
+      "dynamic": false,
       "_source": {
-        "enabled": false
+        "enabled": true
       },
       "properties": {
 

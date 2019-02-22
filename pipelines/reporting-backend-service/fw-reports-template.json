@@ -4,9 +4,9 @@
     "number_of_shards": 1
   },
   "mappings": {
-    "doc": {
+    "_doc": {
       "_source": {
-        "enabled": false
+        "enabled": true
       },
       "properties": {
 
