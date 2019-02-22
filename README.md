@@ -36,6 +36,10 @@ Wenn Anpassungen am Projekt vorgenommen werden müssen, kann das lokal vorbereit
 
 Einmalig müssen mittels `make setup` Abhängigkeiten für den [Kafka Consumer](run-kafka-consumer.sh) und die [Logstash Testumgebung](run-testbundle.sh) initialisiert werden.
 
+Falls Pipelines mit eigenen [grok](grok/)-Patterns verwendet und lokal getestet werden, müssen folgende Befehle lokal ausgeführt werden:
+* `sudo mkdir -p /etc/logstash`
+* `sudo ln -s ~/git/elop-logstash-pipelines /etc/logstash/avm-git`
+
 ### Pipeline anlegen
 
 1. Pipeline mit Filter und Output im entsprechenden Verzeichnis anlegen
