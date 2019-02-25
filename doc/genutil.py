@@ -84,8 +84,9 @@ def deep_update(d, inset, conflict_action):
             if not k in d:
                 d.update({k:inset[k]})
             else:
-                if isinstance(inset[k], dict):
+                if isinstance(inset[k], dict) and isinstance(d[k], dict):
                     deep_update(d[k], inset[k], conflict_action, str_path+"."+k if str_path else k)
+                        
 #                if isinstance(inset[k], list) and isinstance(d[k], list):
 #                => fortunately not necessary
                 else:
@@ -327,6 +328,7 @@ with open(  root_dir+"/doc/ecs-extension.yml", 'r') as f_extension:
         avmyml = avmyml["fields"]
         strip_json_values(avmyml)
         prune_ecs_fields(avmyml, assert_type_field_exists=False)
+        print("# @"+root_dir+"/doc/ecs-extension.yml")
         deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="override")
 
 for path in sorted(glob.glob(root_dir+"doc/avm-schemas/*.yml")):
@@ -336,6 +338,7 @@ for path in sorted(glob.glob(root_dir+"doc/avm-schemas/*.yml")):
             avmyml = avmyml["fields"]
             strip_json_values(avmyml)
             prune_ecs_fields(avmyml, assert_type_field_exists=True)
+            print("# @"+path)
             deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="override")
         else:
             raise Exception("ERROR: missing keyword 'field:' in yaml file: " + path)
@@ -357,8 +360,9 @@ if argvars["action"] == "gen-doc":
         avm_must[p] = {}
         for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
             with open(  json_path, 'r') as must_file:
-                deep_update(avm_must[p], flatten_json(json.loads(withdraw_comments(must_file))), conflict_action="override")
-
+                print("# @"+json_path)
+                deep_update(avm_must[p], json.loads(withdraw_comments(must_file)), conflict_action="override")
+        avm_must[p] = flatten_json( avm_must[p] )
     beats = {}
     for beat in [os.path.basename(os.path.dirname(f)) for f in avm_pipelines]:
         beats[beat] = beats.get(beat, 0) + 1
@@ -391,10 +395,12 @@ if argvars["action"] == "gen-doc":
             str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
             output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
 
-            # remove paths k which are nested in the current object's path
-            for f in avm_pipelines:
-                for d in [k for k in avm_must[f] if path in avm_must[f] and not path == k and k[:len(path)] == path]:
-                    avm_must[f].pop(d)
+            # remove paths k which are nested in the current object's path - just to avoid orphaned listing
+            for p in avm_pipelines:
+                #for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path]:
+                for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path and k[len(path):len(path)+1] == "."]:
+                #for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path and not mapping.amend_path(k, error_non_existing=False)]:
+                    avm_must[p].pop(d)
 
     # ORPHANED FIELDS
     output += '<tr><th rowspan=2><span title=""><h4>orphaned</h4></span></th>'+''.join(['<td colspan='+str(beats[b])+' align="center">'+str(b)+'</td>' for b in sorted(beats.keys())])+'</tr>'
@@ -448,8 +454,9 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         avm_must[p] = {}
         for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
             with open(  json_path, 'r') as must_file:
-                deep_update(avm_must[p], flatten_json(json.loads(withdraw_comments(must_file))), conflict_action="override")
-
+                print("# @"+json_path)
+                deep_update(avm_must[p], json.loads(withdraw_comments(must_file)), conflict_action="override")
+        avm_must[p] = flatten_json( avm_must[p] )
         print ()
         print ("#############################################################")
         print ("# Pipeline: "+p+".conf")
@@ -483,8 +490,10 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
                 show_name = path +' ['+field["type"]+']'
                 output += '#        '+show_name+': '+str(avm_must[p][path]) +'\n' if path in avm_must[p] else ""
 
-                # remove paths k which are nested in the current object's path
-                for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path]:
+                # remove paths k which are nested in the current object's path - just to avoid orphaned listing
+                #for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path]:
+                for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path and k[len(path):len(path)+1] == "."]:
+                #for d in [k for k in avm_must[p] if path in avm_must[p] and not path == k and k[:len(path)] == path and not mapping.amend_path(k, error_non_existing=False)]:
                     avm_must[p].pop(d)
 
         # ORPHANED FIELDS
@@ -506,12 +515,14 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         # override standard template json with auto-generated template => result
         f_std_template = open(root_dir+"standard-template.json", 'r')
         result = json.loads( withdraw_comments(f_std_template) )
+        print("# @genmap=>"+root_dir+"standard-template.json")
         deep_update(result, gen_template, conflict_action="override")
 
         # override generated template with information from pipeline-specific template json
         if os.path.isfile( root_dir+p+"-template.json" ):
             with open(root_dir+p+"-template.json", 'r') as f_template:
                 pipeline_template = json.loads( withdraw_comments(f_template) )
+                print("# @genmap<="+root_dir+p+"-template.json")
                 deep_update(result, pipeline_template, conflict_action="override")
 
         # set index pattern if necessary
