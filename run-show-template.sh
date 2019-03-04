@@ -10,4 +10,4 @@ if [ "$1" ]; then
 	conf_pattern="$(join ',' ${@:1})"
 fi
 
-. .venv/bin/activate && python doc/genutil.py -a show -p "$conf_pattern"
+. .venv/bin/activate && python src/genutil.py -a show -p "$conf_pattern"

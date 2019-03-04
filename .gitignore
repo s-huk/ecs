@@ -1,4 +1,4 @@
-testing/logstash*
+src/logstash*
 *.pyc
 .venv/
 .vscode/

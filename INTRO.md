@@ -17,15 +17,19 @@ Dieses Repository beinhaltet alle Quellen und Tools für Logstash-Pipelines der 
 
 #### Testing
 
-**[testing](testing/)** -> Alle Tests und Utilities für das Aufsetzen und Testen der Logstash Pipelines.
+**[testing](testing/)** -> Logstash-Testdaten nach Pipelines (d.h. je Pipeline die Inputs inkl. Must-Vorgabe).
 
 #### Curator
 
 **[curator](curator/)** -> Alle Konfigs für den [Wiki Curator](https://wiki.avm.de/display/IT/Curator).
 
-#### Dokumentation
+#### Schema
 
-**[doc](doc/)** -> Assets zur Dokumentation der Pipelines und des verwendeten Schemas.
+**[schemas](schemas/)** -> YAML-Artefakte zur Beschreibung des globalen Schemas.
+
+#### Code
+
+**[src](src/)** -> Code für Logstash-Tests und Schema-Generation
 
 
 ## Projekt Anpassungen

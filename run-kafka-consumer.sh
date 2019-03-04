@@ -25,4 +25,4 @@
 #   -p [PRETTIFY], --prettify [PRETTIFY]
 #                         Prettify a JSON payload
 args="$@"
-. .venv/bin/activate && python testing/kafka_consumer.py $args
+. .venv/bin/activate && python src/kafka_consumer.py $args

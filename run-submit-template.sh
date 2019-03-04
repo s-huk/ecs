@@ -10,4 +10,4 @@ if [ "$1" ]; then
 	conf_pattern="$(join ',' ${@:1})"
 fi
 
-. .venv/bin/activate && python doc/genutil.py -a submit-template -c "http://172.16.78.100:9200" -p "$conf_pattern"
+. .venv/bin/activate && python src/genutil.py -a submit-template -c "http://172.16.78.100:9200" -p "$conf_pattern"

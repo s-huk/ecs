@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 dir_of_script="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-testing_dir="$dir_of_script/testing"
+base_dir="$dir_of_script"
+testing_dir="$base_dir/testing"
+src_dir="$base_dir/src"
 
 usage() {
 	echo
@@ -41,9 +43,9 @@ usage() {
 
 # initialization of the test environment
 init() {
-	cd $testing_dir
-	echo "Working directory: $testing_dir"
-	rm -rf $testing_dir/logstash*
+	cd $src_dir
+	echo "Working directory: $src_dir"
+	rm -rf $src_dir/logstash*
 	wget https://artifacts.elastic.co/downloads/logstash/logstash-6.5.0.tar.gz
 	tar xfz logstash-6.5.0.tar.gz
 	rm logstash*tar.gz
@@ -52,7 +54,7 @@ init() {
 	./bin/logstash-plugin install --development
 	cp logstash-core/versions-gem-copy.yml logstash-core-plugin-api
 	if ! [[ "$PATH" =~ "logstash/vendor/jruby/bin" ]]; then
-		export PATH="$testing_dir/logstash/vendor/jruby/bin:$PATH"
+		export PATH="$src_dir/logstash/vendor/jruby/bin:$PATH"
 	fi
 
 	jruby -S gem install bundler
@@ -79,9 +81,9 @@ shift $((OPTIND - 1))
 
 
 # check necessity for initialization
-if [ ! -d "$testing_dir/logstash" ]; then
+if [ ! -d "$src_dir/logstash" ]; then
 	while true; do
-		read -p "Der Ordner testing/logstash ist nicht vorhanden.  Jetzt initialisieren? (dauert ca. 3 Minuten) (j/y/n)" yn
+		read -p "Der Ordner $src_dir/logstash ist nicht vorhanden.  Jetzt initialisieren? (dauert ca. 3 Minuten) (j/y/n)" yn
 		case $yn in
 			[JjYy]* ) init; break;;
 			[Nn]* ) exit;;
@@ -108,7 +110,7 @@ fi
 
 
 # console reporting
-echo "Logstash dir: $testing_dir/logstash"
+echo "Logstash dir: $src_dir/logstash"
 echo
 echo "Testbundle-Verzeichnis: $testbundle_dir"
 echo
@@ -121,11 +123,11 @@ export LOGSTASH_TESTING_CONF_PATTERN="{$conf_pattern}"
 export LOGSTASH_TESTING_TESTBUNDLE_DIR="$testbundle_dir"
 
 if ! [[ "$PATH" =~ "logstash/vendor/jruby/bin" ]]; then
-	export PATH="$testing_dir/logstash/vendor/jruby/bin:$PATH"
-#	export PATH="$testing_dir/logstash/vendor/bundle/jruby/bin:$PATH"
-	export LOGSTASH_HOME="$testing_dir/logstash"
+	export PATH="$src_dir/logstash/vendor/jruby/bin:$PATH"
+#	export PATH="$src_dir/logstash/vendor/bundle/jruby/bin:$PATH"
+	export LOGSTASH_HOME="$src_dir/logstash"
 fi
 
 # run testbundle
-cd $testing_dir/logstash
-bundle exec rspec -fd "$testing_dir/filter_spec.rb"
+cd $src_dir/logstash
+bundle exec rspec -fd "$src_dir/pipeline_testtool.rb"

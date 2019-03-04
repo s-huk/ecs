@@ -91,11 +91,11 @@ def deep_update(d, inset, conflict_action):
 #                => fortunately not necessary
                 else:
                     if d[k] != inset[k] and conflict_action:
-                        if conflict_action == "override":
-                            print ( "# WARNING: value override: '"+str_path+"."+k+"':  +"+str(inset[k])+" -"+str(d[k]) )
+                        if conflict_action.lower().startswith("override"):
+                            print ( "# "+conflict_action[8:].upper()+": '"+str_path+"."+k+"':  +"+str(inset[k])+" -"+str(d[k]) )
                             d[k] = inset[k]
                         elif conflict_action == "error":
-                            raise Exception( "error: found conflict: illegal override '"+str_path+"."+k+"':  +"+str(inset[k])+" -"+str(d[k]) )
+                            raise Exception( "ERROR: illegal override '"+str_path+"."+k+"':  +"+str(inset[k])+" -"+str(d[k]) )
 
     deep_update(d, inset, conflict_action, "")
 
@@ -316,22 +316,22 @@ def prune_ecs_fields(f, assert_type_field_exists):
             prune_ecs_fields(g, assert_type_field_exists)
 
 fields = {}
-with open(  root_dir+"/doc/fields.yml", 'r') as ecs_fields_yml:
+with open(  root_dir+"/schemas/fields.yml", 'r') as ecs_fields_yml:
     fields = yaml.load(ecs_fields_yml)[0]["fields"]
     strip_json_values(fields)
     prune_ecs_fields(fields, assert_type_field_exists=True)
     fields = { "properties": expand_ecs_fields_to_mapping(fields) }
 
-with open(  root_dir+"/doc/ecs-extension.yml", 'r') as f_extension:
+with open(  root_dir+"/schemas/ecs-extension.yml", 'r') as f_extension:
     avmyml = yaml.load(f_extension.read())
     if "fields" in avmyml:
         avmyml = avmyml["fields"]
         strip_json_values(avmyml)
         prune_ecs_fields(avmyml, assert_type_field_exists=False)
-        print("# @"+root_dir+"/doc/ecs-extension.yml")
-        deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="override")
+        print("# @"+root_dir+"/schemas/ecs-extension.yml")
+        deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="overrideWARNING")
 
-for path in sorted(glob.glob(root_dir+"doc/avm-schemas/*.yml")):
+for path in sorted(glob.glob(root_dir+"schemas/avm/*.yml")):
     with open(path, 'r') as f:
         avmyml = yaml.load(f.read())
         if "fields" in avmyml:
@@ -339,7 +339,7 @@ for path in sorted(glob.glob(root_dir+"doc/avm-schemas/*.yml")):
             strip_json_values(avmyml)
             prune_ecs_fields(avmyml, assert_type_field_exists=True)
             print("# @"+path)
-            deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="override")
+            deep_update(fields, { "properties": expand_ecs_fields_to_mapping(avmyml) }, conflict_action="overrideWARNING")
         else:
             raise Exception("ERROR: missing keyword 'field:' in yaml file: " + path)
 
@@ -361,7 +361,7 @@ if argvars["action"] == "gen-doc":
         for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
             with open(  json_path, 'r') as must_file:
                 print("# @"+json_path)
-                deep_update(avm_must[p], json.loads(withdraw_comments(must_file)), conflict_action="override")
+                deep_update(avm_must[p], json.loads(withdraw_comments(must_file)), conflict_action="overrideINFO")
         avm_must[p] = flatten_json( avm_must[p] )
     beats = {}
     for beat in [os.path.basename(os.path.dirname(f)) for f in avm_pipelines]:
@@ -455,7 +455,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
             with open(  json_path, 'r') as must_file:
                 print("# @"+json_path)
-                deep_update(avm_must[p], json.loads(withdraw_comments(must_file)), conflict_action="override")
+                deep_update(avm_must[p], json.loads(withdraw_comments(must_file)), conflict_action="overrideINFO")
         avm_must[p] = flatten_json( avm_must[p] )
         print ()
         print ("#############################################################")
@@ -516,14 +516,14 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         f_std_template = open(root_dir+"standard-template.json", 'r')
         result = json.loads( withdraw_comments(f_std_template) )
         print("# @genmap=>"+root_dir+"standard-template.json")
-        deep_update(result, gen_template, conflict_action="override")
+        deep_update(result, gen_template, conflict_action="overrideINFO")
 
         # override generated template with information from pipeline-specific template json
         if os.path.isfile( root_dir+p+"-template.json" ):
             with open(root_dir+p+"-template.json", 'r') as f_template:
                 pipeline_template = json.loads( withdraw_comments(f_template) )
                 print("# @genmap<="+root_dir+p+"-template.json")
-                deep_update(result, pipeline_template, conflict_action="override")
+                deep_update(result, pipeline_template, conflict_action="overrideINFO")
 
         # set index pattern if necessary
         templateName = p[10:].replace("/", "-")
