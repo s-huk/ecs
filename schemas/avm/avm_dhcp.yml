@@ -1,0 +1,19 @@
+---
+
+fields:
+
+#####################
+# DHCP Log
+#####################
+  - name: avm
+    type: group
+    fields:
+      - name: dhcpd
+        type: group
+        fields:
+          - name: client_name
+            type: keyword
+          - name: operation
+            type: keyword
+          - name: relay_ip
+            type: ip

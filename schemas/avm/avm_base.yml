@@ -1,22 +1,12 @@
 ---
+
+#####################
+# fields.service_type entfernen?
+#####################
 fields:
   - name: fields
     type: group
     fields:
       - name: service_type
         type: keyword
-#####################
-# DHCP Log
-#####################
-  - name: avm
-    type: group
-    fields:
-      - name: dhcpd
-        type: group
-        fields:
-          - name: client_name
-            type: keyword
-          - name: operation
-            type: keyword
-          - name: relay_ip
-            type: ip
+
