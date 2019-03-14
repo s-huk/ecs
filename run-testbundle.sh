@@ -5,6 +5,9 @@ base_dir="$dir_of_script"
 testing_dir="$base_dir/testing"
 src_dir="$base_dir/src"
 
+# simulate runtime environment variable
+export ELOP_HOME="$base_dir"
+
 usage() {
 	echo
 	echo 'Testen von Logstash-Filtern (d.h. *.conf Dateien mit dazugehoerigen JSON-Vorgaben innerhalb eines anzugebenden Testbundle-Ordners).'

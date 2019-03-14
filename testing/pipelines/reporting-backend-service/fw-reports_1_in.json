@@ -1,7 +1,7 @@
 {
   "@metadata": {
     "kafka": {
-      "timestamp": "2018-12-10T23:35:52.145Z"
+      "timestamp": 1552578166000
     }
   },
   "env": "box",
