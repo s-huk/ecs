@@ -10,40 +10,44 @@ import getpass
 #from elasticsearch import Elasticsearch
 #import certifi
 import requests
+import elasticsearch
 
 # root_dir is the directory of the git repo elop-logstash-pipelines
 root_dir = os.path.abspath(sys.path[0]+'/../') +"/"
-#print("\nroot directory: "+root_dir+"\n")
-# arg parsing
-parser = argparse.ArgumentParser(description='Run tooling related to elastic templaes .')
-parser.add_argument('-a', '--action', type=str, required=False, dest='action', help="Action to run. 'show' will print the final template to stdout.", choices=[ "show", "gen-doc", "submit-template" ], default="show")
-parser.add_argument('-p', '--pipelines', type=str, required=False, dest='pipelines', help="Path to pipeline confs to run against. Should be relative to the projects root folder.", default="pipelines/*/*.conf")
-parser.add_argument('-c', '--cluster', type=str, required=False, dest='cluster', help="Target cluster to set the template on. Example: 'http://172.16.78.100:9200'")
-parser.add_argument('-u', '--user', type=str, required=False, dest='user', help="Username to connect with.")
+#root_dir = os.path.abspath('../') +"/"
+print("\nroot directory: "+root_dir+"\n")
 
-#parser.add_argument('-p', '--pipelines', type=str, nargs='+', required=True, dest='pipelines', help="Paths to pipeline confs to run against. Should be relative to the projects root folder.")
+argvars = {"action": "none", "cluster": "http://localhost:9200", "pipelines": "pipelines/*/*.conf" }
 
-argvars = vars( parser.parse_args() )
+if 'genutil' not in sys.modules: # arg parsing
+    parser = argparse.ArgumentParser(description='Run tooling related to elastic templaes .')
+    parser.add_argument('-a', '--action', type=str, required=False, dest='action', help="Action to run. 'show' will print the final template to stdout.", choices=[ "none", "show", "gen-doc", "submit-template" ], default="none")
+    parser.add_argument('-p', '--pipelines', type=str, required=False, dest='pipelines', help="Path to pipeline confs to run against. Should be relative to the projects root folder.", default="pipelines/*/*.conf")
+    parser.add_argument('-c', '--cluster', type=str, required=False, dest='cluster', help="Target cluster to set the template on. Example: 'http://172.16.78.100:9200'")
+    parser.add_argument('-u', '--user', type=str, required=False, dest='user', help="Username to connect with.")
 
-if argvars["action"] == "submit-template" and argvars["cluster"] is None:
-    parser.error("--pipelines submit-template requires --cluster")
+    #parser.add_argument('-p', '--pipelines', type=str, nargs='+', required=True, dest='pipelines', help="Paths to pipeline confs to run against. Should be relative to the projects root folder.")
 
-print()
+    argvars = vars( parser.parse_args() )
+
+    if argvars["action"] == "submit-template" and argvars["cluster"] is None:
+        parser.error("--pipelines submit-template requires --cluster")
+
+    print()
 
 
-# stdout selected pipelines
-if argvars["action"] == "gen-doc" and argvars["pipelines"] != "pipelines/*/*.conf":
-    print("ignoring argument -p " + argvars["pipelines"])
-    argvars["pipelines"] = "pipelines/*/*.conf"
+    # stdout selected pipelines
+    if argvars["action"] == "gen-doc" and argvars["pipelines"] != "pipelines/*/*.conf":
+        print("ignoring argument -p " + argvars["pipelines"])
+        argvars["pipelines"] = "pipelines/*/*.conf"
 
 avm_pipelines = [ m[len(root_dir):-5] for p in argvars["pipelines"].split(",") for m in glob.glob(root_dir+p) if os.path.isfile(m) and m[-5:]==".conf" ]
 avm_pipelines.sort()
 print (" => "+"\n => ".join(avm_pipelines))
 
-
 #print("Called with arguments: %s" % argvars)
 #print(root_dir)
-#print( str(argvars) )
+#print( "ARGVARS:" + str(argvars) )
 #exit()
 
 ###################################################################################
@@ -393,7 +397,7 @@ if argvars["action"] == "gen-doc":
                 show_name = '<span title="'+'('+field["type"]+') '+tr_bad_chars(field.get("description", ""))+'">'+path+'</span>'
 
             str_pattern = '<tr><td>{}</td>'+''.join(['<td align="center"><b>{}</font></b>']*len(avm_pipelines))+'</tr>\n'
-            output += str_pattern.format(show_name, *['<span title="'+f+': '+str(avm_must[f][path])+'">X</span>' if path in avm_must[f] else "" for f in avm_pipelines])
+            output += str_pattern.format(show_name, *['<span title="'+p+': '+str(avm_must[p][path])+'">X</span>' if path in avm_must[p] else "" for p in avm_pipelines])
 
             # remove paths k which are nested in the current object's path - just to avoid orphaned listing
             for p in avm_pipelines:
@@ -424,13 +428,18 @@ if argvars["action"] == "gen-doc":
 # mapping generation
 ###################################################################################
 
-if argvars["action"] == "show" or argvars["action"] == "submit-template":
-
-    if argvars["action"] == "submit-template":
+def submit_templates(es, action):
+    print ("PERFORMUNG ACTION " + action)
+    hostname = argvars["cluster"] if action == "submit-template" else "http://localhost:9200"
+    
+    if action == "submit-template":
         yes_no = input("\nSollen die oben stehenden Templates wirklich an den Server " + argvars["cluster"] + " geschickt werden? [y/N] ")
         if yes_no == '' or not yes_no[0].lower().strip() in ['y', 'j']:
             print("\nAktion wurde nicht durchgeführt.\n")
             exit()
+
+    if action in ["submit-template", "test-template"]:
+
 #        if argvars["user"] is None:
 #            user = input("\nServer-Benutzer: [] ")
 #        else:
@@ -440,14 +449,15 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
 #        passwd = getpass.getpass("\nPasswort: ")
 #        if passwd == '':
 #            print("\nProbleme bei der Passworteingabe. Aktion abgebrochen.\n")
-
+        print("#    Übertrage avm_elop_default_ingest_pipeline")
         with open(  root_dir+'avm_elop_default_ingest_pipeline.json', 'r') as pipe_file:
-            resp = requests.put(argvars["cluster"]+'/_ingest/pipeline/avm_elop_default_ingest_pipeline', json=json.load(pipe_file))
-            if resp.status_code == 200:
-                print("#    Default-Pipeline avm_elop_default_ingest_pipeline ERFOLGREICH UEBERTRAGEN: "+ str(resp.content))
-            else:
-                print("**FEHLER BEI DER INITIALEN UEBERTRAGUNG der Default-Pipeline 'avm_elop_default_ingest_pipeline': " + str(resp.content) )
-                exit()
+            #resp = requests.put(hostname+'/_ingest/pipeline/avm_elop_default_ingest_pipeline', json=json.load(pipe_file))
+            es.ingest.put_pipeline(id="avm_elop_default_ingest_pipeline", body=json.load(pipe_file))
+            #if resp.status_code == 200:
+            #    print("#    Default-Pipeline avm_elop_default_ingest_pipeline ERFOLGREICH UEBERTRAGEN: "+ str(resp.content))
+            #else:
+            #    print("**FEHLER BEI DER INITIALEN UEBERTRAGUNG der Default-Pipeline 'avm_elop_default_ingest_pipeline': " + str(resp.content) )
+            #    exit()
 
     avm_must = {}
     for p in avm_pipelines:
@@ -461,7 +471,7 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         print ("#############################################################")
         print ("# Pipeline: "+p+".conf")
         print ("#############################################################")
-#        if argvars["action"] == "show": # console doc summary
+#        if action == "show": # console doc summary
 
         #
         # print schema
@@ -534,49 +544,72 @@ if argvars["action"] == "show" or argvars["action"] == "submit-template":
         print( json.dumps(result, indent=4, sort_keys=True) )
         print ()
 
-        if argvars["action"] == "submit-template":
+        if action == "submit-template" or action == "test-template":
             if not "index_patterns" in result or not isinstance(result["index_patterns"], list) or [i for i in range(len(result["index_patterns"])) if not isinstance(result["index_patterns"][i], str) or not result["index_patterns"][i].endswith("*") or "*" in result["index_patterns"][i][:-1]]:
                 print("**WARNUNG: Die Vorgabe der Index-Patterns "+str(result["index_patterns"])+" in Pipeline "+p+" fehlt oder ist zu individuell. Daher wurde hierfuer keine automatische Uebermittlung von Template-, Index- oder Alias-Daten durchgeführt.\n")
                 continue
 
             # TEMPLATE CREATION
-            resp = requests.put(argvars["cluster"]+'/_template/'+templateName, json=result)
-            if resp.status_code == 200:
-                print( "#    TEMPLATE "+templateName+" AKTUALISIERUNG ERFOLGREICH: " + str(resp.content) )
-            else:
-                print("#    TEMPLATE "+templateName+" AKTUALISIERUNG FEHLGESCHLAGEN: " + str(resp.content) )
-                exit()
+            print( "#    Erstelle TEMPLATE "+templateName)
+            es.indices.put_template(name=templateName, body=result)
+            
+            #resp = requests.put(hostname+'/_template/'+templateName, json=result)
+            #if resp.status_code == 200:
+            #    print( "#    TEMPLATE "+templateName+" AKTUALISIERUNG ERFOLGREICH: " + str(resp.content) )
+            #else:
+            #    print("#    TEMPLATE "+templateName+" AKTUALISIERUNG FEHLGESCHLAGEN: " + str(resp.content) )
+            #    exit()
 
             for curPattern in result["index_patterns"]:
                 # INDEX CREATION
                 index_prefix = curPattern[:-2] if curPattern[-2:] == "-*" else curPattern[:-1]
-                resp = requests.head(argvars["cluster"]+'/'+index_prefix+'-1')
-                if resp.status_code == 200:
+                #resp = requests.head(hostname+'/'+index_prefix+'-1')
+                if es.indices.exists(index=index_prefix+'-1'):
                     print( "#    INDEX "+index_prefix+"-1 EXISTIERT BEREITS UND WIRD UEBERSPRUNGEN.")
-                elif resp.status_code == 404:
-                    resp = requests.put(argvars["cluster"]+'/'+index_prefix+'-1')
-                    if resp.status_code == 200:
-                        print( "#    INDEX "+index_prefix+"-1 ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
-                    else:
-                        print("#    INDEX "+index_prefix+"-1 ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
-                        exit()
                 else:
-                    print("**FEHLER: Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1  "+resp.status_code+" "+resp.content)
-                    exit()
+                    print( "#    Erstelle INDEX "+index_prefix+"-1")
+                    #resp = requests.put(hostname+'/'+index_prefix+'-1')
+                    es.indices.create(index=index_prefix+'-1')
+                    #if resp.status_code == 200:
+                    #    print( "#    INDEX "+index_prefix+"-1 ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
+                    #else:
+                    #    print("#    INDEX "+index_prefix+"-1 ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                    #    exit()
+                #else:
+                #    print("**FEHLER: Unerwarteter Fehler bei der Erstellung von Index "+index_prefix+"-1  "+resp.status_code+" "+resp.content)
+                #    exit()
 
                 # ALIAS CREATION
-                resp = requests.head(argvars["cluster"]+'/_alias/'+index_prefix)
-                if resp.status_code == 200:
+                #resp = requests.head(hostname+'/_alias/'+index_prefix)
+                if es.indices.exists_alias(index=index_prefix):
                     print( "#    ALIAS "+index_prefix+" EXISTIERT BEREITS UND WIRD UEBERSPRUNGEN.")
-                elif resp.status_code == 404:
-                    resp = requests.post(argvars["cluster"]+'/_aliases', json={"actions":[{"add":{"index":index_prefix+'-1',"alias":index_prefix}}]})
-                    if resp.status_code == 200:
-                        print( "#    ALIAS "+index_prefix+" ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
-                    else:
-                        print("#    ALIAS "+index_prefix+" ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
-                        exit()
                 else:
-                    print("**FEHLER: Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.content)
-                    exit()
+                    print( "#    Erstelle ALIAS "+index_prefix)
+                    #resp = requests.post(hostname+'/_aliases', json={"actions":[{"add":{"index":index_prefix+'-1',"alias":index_prefix}}]})
+                    es.indices.put_alias(index=[index_prefix+'-1'], name=index_prefix)
+                    #if resp.status_code == 200:
+                    #    print( "#    ALIAS "+index_prefix+" ERSTELLUNG ERFOLGREICH: " + str(resp.content) )
+                    #else:
+                    #    print("#    ALIAS "+index_prefix+" ERSTELLUNG FEHLGESCHLAGEN: " + str(resp.content) )
+                    #    exit()
+                #else:
+                #    print("**FEHLER: Unerwarteter Fehler bei der Erstellung von Alias "+index_prefix+"  "+resp.status_code+" "+resp.content)
+                #    exit()
 
-
+                if action == "test-template":
+                    print ("--------------"+ root_dir+'testing/'+p+"_*_must.json" +"  "+str(  sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ) ) )
+                    for json_path in sorted( glob.glob(root_dir+'testing/'+p+"_*_must.json") ):
+                        print( "#    Befülle INDEX "+index_prefix+" <== "+json_path)
+                        with open(  json_path, 'r') as must_file:
+                            j = json.loads(withdraw_comments(must_file))
+                            es.index(index=index_prefix, doc_type="doc", body=j)
+                    res = es.search(index=index_prefix, doc_type='doc', body={'query':{'match_all':{}}})
+                    print( "#    Ausgabe aller Dokumente im Index "+index_prefix+":")
+                    print (res)
+            
+if argvars["action"] == "show":
+    submit_templates(None, "show")
+    
+if argvars["action"] == "submit-template":
+    es = elasticsearch.Elasticsearch([argvars["cluster"]])
+    submit_templates(es, argvars["action"])

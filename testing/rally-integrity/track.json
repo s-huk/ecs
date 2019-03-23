@@ -1,0 +1,16 @@
+{% import "rally.helpers" as rally with context %}
+{
+    "version": 2,
+    "description": "ELOP track",
+    "schedule": [
+        {
+            "warmup-iterations": 0,
+            "iterations": 1,
+            "operation": {
+                "name": "create_indices_and_insert_data",
+                "operation-type": "optype_create_indices_and_insert_data",
+                "id": "create_indices_and_insert_data"
+            }
+        }
+    ]
+}
